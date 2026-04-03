@@ -1,4 +1,16 @@
-export default function Header({ tabs, activeTab, setActiveTab }) {
+interface Tab {
+  id: string
+  label: string
+  icon: string
+}
+
+interface HeaderProps {
+  tabs: Tab[]
+  activeTab: string
+  setActiveTab: (tabId: string) => void
+}
+
+export default function Header({ tabs, activeTab, setActiveTab }: HeaderProps) {
   return (
     <>
       <header className="bg-white shadow-md">
@@ -6,7 +18,7 @@ export default function Header({ tabs, activeTab, setActiveTab }) {
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <div className="bg-primary-600 text-white p-2 rounded-lg">
-                <span className="text-2xl">🎓</span>
+                <span className="text-2xl">{'\uD83C\uDF93'}</span>
               </div>
               <h1 className="text-2xl font-bold text-gray-900">Educational Platform</h1>
             </div>

@@ -1,8 +1,50 @@
 import { useState } from 'react'
+import type { ReactNode } from 'react'
 import CodeBlock from '../ui/CodeBlock'
 import DocSection from '../ui/DocSection'
 
-const DOC_SECTIONS = [
+// ---------------------------------------------------------------------------
+// Types
+// ---------------------------------------------------------------------------
+
+interface DocSectionNav {
+  id: string
+  label: string
+}
+
+interface AgentInfo {
+  name: string
+  color: string
+  desc: string
+  use: string
+}
+
+interface SecurityPractice {
+  title: string
+  content: string
+}
+
+interface TroubleshootIssue {
+  error: string
+  title: string
+  fix: string
+}
+
+interface ShortcutGroup {
+  title: string
+  rows: [string, string][]
+}
+
+interface Capability {
+  label: string
+  icon: string
+}
+
+// ---------------------------------------------------------------------------
+// Constants
+// ---------------------------------------------------------------------------
+
+const DOC_SECTIONS: DocSectionNav[] = [
   { id: 'overview', label: 'Overview' },
   { id: 'install', label: 'Installation' },
   { id: 'commands', label: 'Commands' },
@@ -14,7 +56,11 @@ const DOC_SECTIONS = [
   { id: 'troubleshoot', label: 'Troubleshooting' },
 ]
 
-function OverviewSection() {
+// ---------------------------------------------------------------------------
+// Section Components
+// ---------------------------------------------------------------------------
+
+function OverviewSection(): ReactNode {
   return (
     <div className="space-y-4">
       <h3 className="text-xl font-bold text-gray-900">Overview</h3>
@@ -30,11 +76,11 @@ function OverviewSection() {
             </tr>
           </thead>
           <tbody>
-            {[
+            {([
               ['Haiku', 'Fast', 'Basic', 'Quick tasks, simple queries'],
               ['Sonnet', 'Medium', 'High', 'Most development work'],
               ['Opus', 'Slow', 'Maximum', 'Complex reasoning, architecture'],
-            ].map(([m, s, c, b]) => (
+            ] as const).map(([m, s, c, b]) => (
               <tr key={m} className="border-b border-gray-100">
                 <td className="px-4 py-2 border border-gray-200 font-mono text-blue-700">{m}</td>
                 <td className="px-4 py-2 border border-gray-200">{s}</td>
@@ -49,7 +95,7 @@ function OverviewSection() {
   )
 }
 
-function InstallSection() {
+function InstallSection(): ReactNode {
   return (
     <div className="space-y-4">
       <h3 className="text-xl font-bold text-gray-900">Installation & Setup</h3>
@@ -72,8 +118,8 @@ function InstallSection() {
   )
 }
 
-function CommandsSection() {
-  const slashCommands = [
+function CommandsSection(): ReactNode {
+  const slashCommands: [string, string][] = [
     ['/help', 'Show help & available commands'],
     ['/clear', 'Clear conversation history'],
     ['/exit', 'Exit Claude Code CLI'],
@@ -84,7 +130,7 @@ function CommandsSection() {
     ['/loop 5m /cmd', 'Run a command on recurring interval'],
     ['/claude-api', 'Claude API / Anthropic SDK assistance'],
   ]
-  const cliFlags = [
+  const cliFlags: [string, string][] = [
     ['--help', 'Show help'],
     ['--version', 'Display version'],
     ['--config <path>', 'Custom config file'],
@@ -130,8 +176,8 @@ function CommandsSection() {
   )
 }
 
-function ShortcutsSection() {
-  const groups = [
+function ShortcutsSection(): ReactNode {
+  const groups: ShortcutGroup[] = [
     { title: 'Session Control', rows: [['Ctrl+C', 'Cancel current operation'], ['Ctrl+D', 'Exit Claude Code CLI'], ['Ctrl+L', 'Clear screen'], ['↑ / ↓', 'Navigate command history'], ['Tab', 'Auto-complete commands']] },
     { title: 'Editing', rows: [['Ctrl+A', 'Move to beginning of line'], ['Ctrl+E', 'Move to end of line'], ['Ctrl+U', 'Delete to beginning of line'], ['Ctrl+K', 'Delete to end of line'], ['Ctrl+W', 'Delete word'], ['Ctrl+Y', 'Paste deleted text']] },
     { title: 'Search', rows: [['Ctrl+R', 'Search command history'], ['Ctrl+S', 'Forward search'], ['Ctrl+F', 'Search within files']] },
@@ -161,7 +207,7 @@ function ShortcutsSection() {
   )
 }
 
-function ConfigSection() {
+function ConfigSection(): ReactNode {
   return (
     <div className="space-y-4">
       <h3 className="text-xl font-bold text-gray-900">Configuration System</h3>
@@ -215,8 +261,8 @@ CLAUDE.md                        # Project documentation`}</CodeBlock>
   )
 }
 
-function AgentsSection() {
-  const agents = [
+function AgentsSection(): ReactNode {
+  const agents: AgentInfo[] = [
     { name: 'General-Purpose', color: 'blue', desc: 'Complex multi-step tasks, autonomous execution. Has access to all tools.', use: 'Complex research, multi-step code gen, autonomous problem-solving' },
     { name: 'Explore', color: 'green', desc: 'Fast codebase exploration. No write/edit tools.', use: 'Finding files, searching keywords, understanding structure' },
     { name: 'Plan', color: 'purple', desc: 'Software architect for designing implementation plans.', use: 'Planning strategies, identifying critical files, architecture trade-offs' },
@@ -244,7 +290,7 @@ claude agent stop <agent-id>`}</CodeBlock>
   )
 }
 
-function GitSection() {
+function GitSection(): ReactNode {
   return (
     <div className="space-y-4">
       <h3 className="text-xl font-bold text-gray-900">Git Integration</h3>
@@ -281,8 +327,8 @@ git pull origin main             # Pull changes`}</CodeBlock>
   )
 }
 
-function SecuritySection() {
-  const practices = [
+function SecuritySection(): ReactNode {
+  const practices: SecurityPractice[] = [
     { title: '1. Never Commit Secrets', content: 'Add .env, *.key, *.pem, credentials.json to .gitignore' },
     { title: '2. Use Environment Variables', content: 'Reference secrets via ${API_KEY} in config instead of hardcoding' },
     { title: '3. Enable Sandbox', content: 'Set sandbox.enabled: true to isolate execution environment' },
@@ -301,7 +347,7 @@ function SecuritySection() {
       </div>
       <DocSection title="Permission Categories">
         <div className="flex flex-wrap gap-2">
-          {['Bash — Command execution', 'WebFetch — Network requests', 'Read — File reading', 'Write — File writing', 'Edit — File modification'].map(p => (
+          {['Bash — Command execution', 'WebFetch — Network requests', 'Read — File reading', 'Write — File writing', 'Edit — File modification'].map((p) => (
             <span key={p} className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm">{p}</span>
           ))}
         </div>
@@ -310,8 +356,8 @@ function SecuritySection() {
   )
 }
 
-function TroubleshootSection() {
-  const issues = [
+function TroubleshootSection(): ReactNode {
+  const issues: TroubleshootIssue[] = [
     { error: 'EPERM: operation not permitted', title: 'Permission Denied', fix: 'Check sandbox settings, update permissions in settings.json, or check macOS Firewall settings.' },
     { error: 'EADDRINUSE: address already in use', title: 'Cannot Bind to Port', fix: 'Run: lsof -ti:3000 | xargs kill -9  or use a different port with: npm run dev -- --port 3001' },
     { error: '403: Permission denied', title: 'Authentication Failed', fix: 'Verify token with: echo $ANTHROPIC_AUTH_TOKEN  — generate a new token and update settings.json.' },
@@ -339,7 +385,13 @@ function TroubleshootSection() {
   )
 }
 
-const SECTION_MAP = {
+// ---------------------------------------------------------------------------
+// Section map & main component
+// ---------------------------------------------------------------------------
+
+type SectionId = typeof DOC_SECTIONS[number]['id']
+
+const SECTION_MAP: Record<string, () => ReactNode> = {
   overview: OverviewSection,
   install: InstallSection,
   commands: CommandsSection,
@@ -351,8 +403,8 @@ const SECTION_MAP = {
   troubleshoot: TroubleshootSection,
 }
 
-export default function DocsTab() {
-  const [activeDocSection, setActiveDocSection] = useState('overview')
+export default function DocsTab(): ReactNode {
+  const [activeDocSection, setActiveDocSection] = useState<SectionId>('overview')
   const ActiveSection = SECTION_MAP[activeDocSection]
 
   return (
@@ -367,14 +419,14 @@ export default function DocsTab() {
           </div>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-          {[
+          {([
             { label: 'Code Generation', icon: '✍️' },
             { label: 'File Operations', icon: '📁' },
             { label: 'Git Integration', icon: '🔀' },
             { label: 'Multi-Agent System', icon: '🤖' },
             { label: 'Custom Skills', icon: '🔧' },
             { label: 'Security Controls', icon: '🔒' },
-          ].map((cap) => (
+          ] as Capability[]).map((cap) => (
             <div key={cap.label} className="bg-gray-50 rounded-lg px-3 py-2 flex items-center gap-2 text-sm text-gray-700">
               <span>{cap.icon}</span>{cap.label}
             </div>

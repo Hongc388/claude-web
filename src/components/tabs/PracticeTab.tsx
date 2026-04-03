@@ -1,4 +1,10 @@
-const quizzes = [
+interface Quiz {
+  question: string
+  options: string[]
+  correct: number
+}
+
+const quizzes: Quiz[] = [
   { question: 'What is 2 + 2?', options: ['3', '4', '5', '6'], correct: 1 },
   { question: 'What is the capital of France?', options: ['London', 'Berlin', 'Paris', 'Madrid'], correct: 2 },
 ]
@@ -6,7 +12,7 @@ const quizzes = [
 export default function PracticeTab() {
   return (
     <div className="bg-white rounded-2xl shadow-lg p-8">
-      <h2 className="text-2xl font-bold text-gray-900 mb-6">Practice Exercises ✏️</h2>
+      <h2 className="text-2xl font-bold text-gray-900 mb-6">Practice Exercises {'\u270F\uFE0F'}</h2>
       <div className="space-y-4">
         {quizzes.map((quiz, idx) => (
           <div key={idx} className="border border-gray-200 rounded-xl p-6">

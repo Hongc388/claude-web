@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import type { ComponentType } from 'react'
 import './App.css'
 import Header from './components/Header'
 import HomeTab from './components/tabs/HomeTab'
@@ -7,15 +8,21 @@ import PracticeTab from './components/tabs/PracticeTab'
 import ProgressTab from './components/tabs/ProgressTab'
 import DocsTab from './components/tabs/DocsTab'
 
-const TABS = [
-  { id: 'home', label: 'Home', icon: '🏠' },
-  { id: 'learn', label: 'Learn', icon: '📚' },
-  { id: 'practice', label: 'Practice', icon: '✏️' },
-  { id: 'progress', label: 'Progress', icon: '📊' },
-  { id: 'docs', label: 'CLI Docs', icon: '🤖' },
+interface Tab {
+  id: string
+  label: string
+  icon: string
+}
+
+const TABS: Tab[] = [
+  { id: 'home', label: 'Home', icon: '\uD83C\uDFE0' },
+  { id: 'learn', label: 'Learn', icon: '\uD83D\uDCDA' },
+  { id: 'practice', label: 'Practice', icon: '\u270F\uFE0F' },
+  { id: 'progress', label: 'Progress', icon: '\uD83D\uDCCA' },
+  { id: 'docs', label: 'CLI Docs', icon: '\uD83E\uDD16' },
 ]
 
-const TAB_COMPONENTS = {
+const TAB_COMPONENTS: Record<string, ComponentType> = {
   home: HomeTab,
   learn: LearnTab,
   practice: PracticeTab,
@@ -24,7 +31,7 @@ const TAB_COMPONENTS = {
 }
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState('home')
+  const [activeTab, setActiveTab] = useState<string>('home')
   const ActiveTab = TAB_COMPONENTS[activeTab]
 
   return (

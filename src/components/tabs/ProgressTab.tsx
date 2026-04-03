@@ -1,9 +1,9 @@
-const achievements = ['First Step', 'Quick Learner', 'Perfect Score', 'Dedicated']
+const achievements: string[] = ['First Step', 'Quick Learner', 'Perfect Score', 'Dedicated']
 
 export default function ProgressTab() {
   return (
     <div className="bg-white rounded-2xl shadow-lg p-8">
-      <h2 className="text-2xl font-bold text-gray-900 mb-6">Your Progress 📊</h2>
+      <h2 className="text-2xl font-bold text-gray-900 mb-6">Your Progress {'\uD83D\uDCCA'}</h2>
       <div className="space-y-6">
         <div className="border border-gray-200 rounded-xl p-6">
           <h3 className="font-bold text-lg text-gray-900 mb-4">Statistics</h3>
@@ -24,11 +24,11 @@ export default function ProgressTab() {
         </div>
 
         <div className="border border-gray-200 rounded-xl p-6">
-          <h3 className="font-bold text-lg text-gray-900 mb-4">Achievements 🏆</h3>
+          <h3 className="font-bold text-lg text-gray-900 mb-4">Achievements {'\uD83C\uDFC6'}</h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {achievements.map((achievement, idx) => (
               <div key={idx} className="bg-gray-100 rounded-lg p-4 text-center opacity-50">
-                <div className="text-3xl mb-2">🔒</div>
+                <div className="text-3xl mb-2">{'\uD83D\uDD12'}</div>
                 <div className="text-sm font-medium text-gray-600">{achievement}</div>
               </div>
             ))}
