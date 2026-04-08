@@ -2,6 +2,7 @@ import { useState } from 'react'
 import type { ReactNode } from 'react'
 import CodeBlock from '../ui/CodeBlock'
 import DocSection from '../ui/DocSection'
+import HoverCard from '../ui/HoverCard'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -38,6 +39,8 @@ interface ShortcutGroup {
 interface Capability {
   label: string
   icon: string
+  description: string
+  imageSrc: string
 }
 
 // ---------------------------------------------------------------------------
@@ -178,8 +181,9 @@ function CommandsSection(): ReactNode {
 
 function ShortcutsSection(): ReactNode {
   const groups: ShortcutGroup[] = [
+    { title: 'General Shortcuts', rows: [['!', 'Bash Mode'], ['/', 'Commannds'], ['@', 'File Path'], ['&', 'For Background'], ['Ctrl+C', 'Cancel current operation']] },
     { title: 'Session Control', rows: [['Ctrl+C', 'Cancel current operation'], ['Ctrl+D', 'Exit Claude Code CLI'], ['Ctrl+L', 'Clear screen'], ['↑ / ↓', 'Navigate command history'], ['Tab', 'Auto-complete commands']] },
-    { title: 'Editing', rows: [['Ctrl+A', 'Move to beginning of line'], ['Ctrl+E', 'Move to end of line'], ['Ctrl+U', 'Delete to beginning of line'], ['Ctrl+K', 'Delete to end of line'], ['Ctrl+W', 'Delete word'], ['Ctrl+Y', 'Paste deleted text']] },
+    { title: 'Editing', rows: [['Ctrl+A', 'Move to beginning of line'], ['Ctrl+E', 'Move to end of line'], ['Ctrl+U', 'Delete to beginning of line'], ['Ctrl+K', 'Delete to end of line'], ['Ctrl+W', 'Delete word'], ['Ctrl+Y', 'Paste deleted text'], ['Double Tap Esc', 'Clear the Input']] },
     { title: 'Search', rows: [['Ctrl+R', 'Search command history'], ['Ctrl+S', 'Forward search'], ['Ctrl+F', 'Search within files']] },
   ]
   return (
@@ -420,16 +424,60 @@ export default function DocsTab(): ReactNode {
         </div>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
           {([
-            { label: 'Code Generation', icon: '✍️' },
-            { label: 'File Operations', icon: '📁' },
-            { label: 'Git Integration', icon: '🔀' },
-            { label: 'Multi-Agent System', icon: '🤖' },
-            { label: 'Custom Skills', icon: '🔧' },
-            { label: 'Security Controls', icon: '🔒' },
+            {
+              label: 'Code Generation',
+              icon: '✍️',
+              description:
+                'Generate code in any language directly from natural-language prompts. Claude reads surrounding files to match your project style and conventions.',
+              imageSrc: '/images/code-generation.png',
+            },
+            {
+              label: 'File Operations',
+              icon: '📁',
+              description:
+                'Read, write, edit, and search across your codebase with dedicated tools. Operations are scoped by sandbox and permission settings.',
+              imageSrc: '/images/file-operations.png',
+            },
+            {
+              label: 'Git Integration',
+              icon: '🔀',
+              description:
+                'Auto-detects git repos, generates commit messages, manages branches, and integrates with the gh CLI for PRs and issues.',
+              imageSrc: '/images/git-integration.png',
+            },
+            {
+              label: 'Multi-Agent System',
+              icon: '🤖',
+              description:
+                'Spawn specialized subagents (general-purpose, explore, plan) in parallel to handle research, planning, and execution independently.',
+              imageSrc: '/images/multi-agent.png',
+            },
+            {
+              label: 'Custom Skills',
+              icon: '🔧',
+              description:
+                'Define reusable skills via slash commands (/commit, /simplify, /loop) that bundle prompts and tools into one-shot workflows.',
+              imageSrc: '/images/custom-skills.png',
+            },
+            {
+              label: 'Security Controls',
+              icon: '🔒',
+              description:
+                'Sandbox filesystem and network access, allow/deny permission rules, and hooks for auditing every tool call.',
+              imageSrc: '/images/security-controls.png',
+            },
           ] as Capability[]).map((cap) => (
-            <div key={cap.label} className="bg-gray-50 rounded-lg px-3 py-2 flex items-center gap-2 text-sm text-gray-700">
-              <span>{cap.icon}</span>{cap.label}
-            </div>
+            <HoverCard
+              key={cap.label}
+              title={cap.label}
+              description={cap.description}
+              imageSrc={cap.imageSrc}
+            >
+              <div className="bg-gray-50 hover:bg-gray-100 rounded-lg px-3 py-2 flex items-center gap-2 text-sm text-gray-700 cursor-pointer transition-colors">
+                <span>{cap.icon}</span>
+                {cap.label}
+              </div>
+            </HoverCard>
           ))}
         </div>
       </div>
