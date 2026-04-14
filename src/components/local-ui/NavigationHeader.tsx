@@ -1,16 +1,12 @@
-interface Tab {
-  id: string
-  label: string
-  icon: string
-}
+import type { Tab } from '@/utils/constants'
 
-interface HeaderProps {
+interface NavigationHeaderProps {
   tabs: Tab[]
   activeTab: string
   setActiveTab: (tabId: string) => void
 }
 
-export default function Header({ tabs, activeTab, setActiveTab }: HeaderProps) {
+export default function NavigationHeader({ tabs, activeTab, setActiveTab }: NavigationHeaderProps) {
   return (
     <>
       <header className="bg-white shadow-md">
@@ -18,7 +14,7 @@ export default function Header({ tabs, activeTab, setActiveTab }: HeaderProps) {
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <div className="bg-primary-600 text-white p-2 rounded-lg">
-                <span className="text-2xl">{'\uD83C\uDF93'}</span>
+                <span className="text-2xl">🎓</span>
               </div>
               <h1 className="text-2xl font-bold text-gray-900">Educational Platform</h1>
             </div>

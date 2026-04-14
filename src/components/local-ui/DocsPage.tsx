@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import type { ReactNode } from 'react'
-import CodeBlock from '../ui/CodeBlock'
-import DocSection from '../ui/DocSection'
-import HoverCard from '../ui/HoverCard'
+import CodeBlock from '@/components/ui/CodeBlock'
+import DocSection from '@/components/ui/DocSection'
+import HoverCard from '@/components/ui/HoverCard'
 
 // ---------------------------------------------------------------------------
 // Types
