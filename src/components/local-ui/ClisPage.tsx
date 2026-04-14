@@ -59,6 +59,33 @@ claude
           ['~/.claude/settings.json', 'Global defaults applied across all projects'],
         ],
       },
+      {
+        type: 'paragraph',
+        text: 'Start sessions, pipe content, resume conversations, and manage updates with these top-level CLI commands:',
+      },
+      {
+        type: 'table',
+        header: ['Command', 'Description — Example'],
+        rows: [
+          ['claude', 'Start interactive session — claude'],
+          ['claude "query"', 'Start session with initial prompt — claude "explain this project"'],
+          ['claude -p "query"', 'Run query non-interactively and exit — claude -p "explain this function"'],
+          ['cat file | claude -p "query"', 'Process piped content — cat logs.txt | claude -p "explain"'],
+          ['claude -c', 'Continue most recent conversation in current directory — claude -c'],
+          ['claude -c -p "query"', 'Continue most recent conversation non-interactively — claude -c -p "Check for type errors"'],
+          ['claude -r "<session>" "query"', 'Resume session by ID or name — claude -r "auth-refactor" "Finish this PR"'],
+          ['claude update', 'Update Claude Code to the latest version'],
+          ['claude auth login', 'Sign in to your Anthropic account; use --console for API key billing — claude auth login --console'],
+          ['claude auth logout', 'Log out from your Anthropic account'],
+          ['claude auth status', 'Show authentication status as JSON; use --text for human-readable output'],
+          ['claude agents', 'List all configured subagents grouped by source'],
+          ['claude auto-mode defaults', 'Print built-in auto mode classifier rules as JSON — claude auto-mode defaults > rules.json'],
+          ['claude mcp', 'Configure Model Context Protocol (MCP) servers'],
+          ['claude plugin', 'Manage Claude Code plugins (alias: claude plugins) — claude plugin install code-review@claude-plugins-official'],
+          ['claude remote-control', 'Start a Remote Control server — claude remote-control --name "My Project"'],
+          ['claude setup-token', 'Generate a long-lived OAuth token for CI and scripts'],
+        ],
+      },
     ],
   },
 
@@ -77,6 +104,7 @@ claude
         type: 'table',
         header: ['Command', 'What It Does'],
         rows: [
+          ['?', 'Show a list of available slash commands and their descriptions (alias: /help)'],
           ['/add-dir <path>', 'Add a working directory for file access during the current session'],
           ['/agents', 'Manage agent configurations'],
           ['/autofix-pr [prompt]', 'Spawn a session that watches the current branch\'s PR and pushes fixes when CI fails or reviewers comment'],
@@ -172,169 +200,326 @@ claude
       {
         type: 'code',
         text: `# Common launch patterns
-claude                          # Interactive session, default model
-claude --model opus             # Use claude-opus-4-6
-claude --model haiku            # Use claude-haiku-4-5 (fast, cheap)
-claude --debug                  # Verbose request/response logs
-claude -p "Fix the auth bug"    # One-shot non-interactive prompt`,
+claude                                      # Interactive session
+claude "explain this project"               # Start with initial prompt
+claude -p "Fix the auth bug"                # Non-interactive, then exit
+cat logs.txt | claude -p "explain"          # Process piped content
+claude -c                                   # Continue last conversation
+claude -r "auth-refactor" "Finish the PR"   # Resume named session
+claude --model claude-sonnet-4-6            # Specific model
+claude --permission-mode plan               # Start in plan mode
+claude -w feature-auth                      # Isolated git worktree
+claude --bare -p "query"                    # Minimal mode, no hooks`,
+      },
+      {
+        type: 'paragraph',
+        text: 'Note: claude --help does not list every flag — a flag\'s absence from --help does not mean it is unavailable.',
       },
       {
         type: 'table',
         header: ['Flag', 'Description'],
         rows: [
-          ['--model <name>', 'Model to use: opus | sonnet | haiku (or full model ID)'],
-          ['-p "<prompt>"', 'Run a single prompt non-interactively, then exit'],
-          ['--debug', 'Enable full request/response debug logging'],
-          ['--verbose', 'Show detailed output including tool calls'],
-          ['--quiet', 'Suppress non-essential output'],
-          ['--max-tokens <n>', 'Limit response token count'],
-          ['--timeout <ms>', 'Request timeout in milliseconds (default: 120000)'],
-          ['--output-format', 'Output mode: text | json | stream-json'],
-          ['--no-color', 'Disable ANSI colour output'],
+          ['--add-dir', 'Add extra working directories for file access — claude --add-dir ../apps ../lib'],
+          ['--agent', 'Specify an agent for the current session — claude --agent my-custom-agent'],
+          ['--agents', 'Define custom subagents dynamically via JSON with description and prompt fields'],
+          ['--allow-dangerously-skip-permissions', 'Add bypassPermissions to the Shift+Tab mode cycle without starting in it'],
+          ['--allowedTools', 'Tools that run without permission prompts — "Bash(git log *)" "Read"'],
+          ['--append-system-prompt', 'Append custom text to the end of the default system prompt'],
+          ['--append-system-prompt-file', 'Load additional system prompt text from a file and append it'],
+          ['--bare', 'Minimal mode: skip hooks, skills, plugins, MCP, and CLAUDE.md for faster scripted calls'],
+          ['--betas', 'Beta headers to include in API requests (API key users only)'],
+          ['--channels', '(Research preview) MCP servers whose channel notifications Claude should listen for'],
+          ['--chrome', 'Enable Chrome browser integration for web automation and testing'],
+          ['--continue, -c', 'Load the most recent conversation in the current directory'],
+          ['--dangerously-skip-permissions', 'Skip all permission prompts — equivalent to bypassPermissions mode'],
+          ['--debug', 'Enable debug mode with optional category filter — claude --debug "api,mcp"'],
+          ['--debug-file <path>', 'Write debug logs to a specific file path; implicitly enables debug mode'],
+          ['--disable-slash-commands', 'Disable all skills and commands for this session'],
+          ['--disallowedTools', 'Tools removed from model context; cannot be used in this session'],
+          ['--effort', 'Set effort level: low, medium, high, max (Opus 4.6 only) — claude --effort high'],
+          ['--exclude-dynamic-system-prompt-sections', 'Move per-machine sections to the first user message to improve prompt-cache reuse'],
+          ['--fallback-model', 'Fallback model when default is overloaded (print mode only)'],
+          ['--fork-session', 'Create a new session ID when resuming instead of reusing the original'],
+          ['--from-pr', 'Resume sessions linked to a specific GitHub PR number or URL — claude --from-pr 123'],
+          ['--ide', 'Auto-connect to IDE on startup if exactly one valid IDE is available'],
+          ['--init', 'Run initialization hooks and start interactive mode'],
+          ['--init-only', 'Run initialization hooks and exit without starting an interactive session'],
+          ['--include-hook-events', 'Include hook lifecycle events in output stream (requires --output-format stream-json)'],
+          ['--include-partial-messages', 'Include partial streaming events (requires -p and stream-json)'],
+          ['--input-format', 'Input format for print mode: text or stream-json'],
+          ['--json-schema', 'Return validated JSON output matching a JSON Schema after the agent completes (print mode only)'],
+          ['--maintenance', 'Run maintenance hooks and start interactive mode'],
+          ['--max-budget-usd', 'Max dollar amount to spend on API calls before stopping (print mode only)'],
+          ['--max-turns', 'Limit agentic turns in print mode; exits with error when reached (no limit by default)'],
+          ['--mcp-config', 'Load MCP servers from JSON files or strings — claude --mcp-config ./mcp.json'],
+          ['--model', 'Set model by alias (sonnet, opus) or full ID — claude --model claude-sonnet-4-6'],
+          ['--name, -n', 'Set a display name for the session — claude -n "my-feature-work"'],
+          ['--no-chrome', 'Disable Chrome browser integration for this session'],
+          ['--no-session-persistence', 'Disable session saving to disk so it cannot be resumed (print mode only)'],
+          ['--output-format', 'Output format for print mode: text, json, or stream-json'],
+          ['--enable-auto-mode', 'Unlock auto mode in the Shift+Tab cycle (Team/Enterprise/API plan, Sonnet/Opus 4.6 only)'],
+          ['--permission-mode', 'Begin in a specified permission mode: default, acceptEdits, plan, auto, or bypassPermissions'],
+          ['--permission-prompt-tool', 'MCP tool to handle permission prompts in non-interactive mode'],
+          ['--plugin-dir', 'Load plugins from a directory for this session only; repeat the flag for multiple dirs'],
+          ['--print, -p', 'Run non-interactively and print the response without opening interactive mode'],
+          ['--remote', 'Create a new web session on claude.ai with the provided task description'],
+          ['--remote-control, --rc', 'Start an interactive session with Remote Control enabled from claude.ai or the Claude app'],
+          ['--remote-control-session-name-prefix', 'Prefix for auto-generated Remote Control session names (defaults to machine hostname)'],
+          ['--replay-user-messages', 'Re-emit user messages from stdin back on stdout (requires stream-json input and output)'],
+          ['--resume, -r', 'Resume a specific session by ID or name, or show an interactive picker'],
+          ['--session-id', 'Use a specific session ID for the conversation (must be a valid UUID)'],
+          ['--setting-sources', 'Comma-separated setting sources to load: user, project, local'],
+          ['--settings', 'Path to a settings JSON file or JSON string for additional settings'],
+          ['--strict-mcp-config', 'Only use MCP servers from --mcp-config, ignoring all other MCP configurations'],
+          ['--system-prompt', 'Replace the entire system prompt with custom text'],
+          ['--system-prompt-file', 'Load system prompt from a file, replacing the default prompt'],
+          ['--teleport', 'Resume a web session in your local terminal'],
+          ['--teammate-mode', 'Set how agent team teammates display: auto (default), in-process, or tmux'],
+          ['--tmux', 'Create a tmux session for the worktree (requires --worktree); pass --tmux=classic for traditional tmux'],
+          ['--tools', 'Restrict which built-in tools Claude can use — claude --tools "Bash,Edit,Read"'],
+          ['--verbose', 'Enable verbose logging; shows full turn-by-turn output'],
+          ['--version, -v', 'Output the version number'],
+          ['--worktree, -w', 'Start Claude in an isolated git worktree — claude -w feature-auth'],
+        ],
+      },
+      {
+        type: 'paragraph',
+        text: 'System prompt flags — four flags for customizing the system prompt, all work in both interactive and non-interactive modes. --system-prompt and --system-prompt-file are mutually exclusive; append flags can combine with either. For most use cases, prefer an append flag to preserve built-in capabilities.',
+      },
+      {
+        type: 'table',
+        header: ['Flag', 'Behavior'],
+        rows: [
+          ['--system-prompt', 'Replaces the entire default system prompt — claude --system-prompt "You are a Python expert"'],
+          ['--system-prompt-file', 'Replaces default prompt with file contents — claude --system-prompt-file ./prompts/review.txt'],
+          ['--append-system-prompt', 'Appends to the default prompt — claude --append-system-prompt "Always use TypeScript"'],
+          ['--append-system-prompt-file', 'Appends file contents to the default prompt — claude --append-system-prompt-file ./style-rules.txt'],
         ],
       },
     ],
   },
 
-  // ── IDE EXTENSIONS ───────────────────────────────────────────────────────────
+  // ── HOOKS REFERENCE ──────────────────────────────────────────────────────────
   {
-    id: 'ide',
-    label: 'IDE Extensions',
-    icon: '🖥️',
-    description: 'Integrating Claude Code into your editor for in-context AI assistance.',
+    id: 'hooks',
+    label: 'Hooks Reference',
+    icon: '🪝',
+    description: 'Shell commands that execute automatically on Claude Code lifecycle events.',
     content: [
       {
-        type: 'cards',
-        items: [
-          {
-            title: 'VS Code',
-            color: 'blue',
-            body: 'Install the "Claude Code" extension from the VS Code Marketplace. Adds a Claude panel, inline suggestions, and the same slash commands available in the terminal.',
-          },
-          {
-            title: 'JetBrains',
-            color: 'green',
-            body: 'Install from JetBrains Marketplace. Compatible with IntelliJ IDEA, PyCharm, WebStorm, GoLand, and others. Provides a tool window and editor actions.',
-          },
-          {
-            title: 'Web App',
-            color: 'purple',
-            body: 'claude.ai/code provides a browser-based Claude Code session — useful on machines where installing npm packages is restricted.',
-          },
-          {
-            title: 'Desktop App',
-            color: 'orange',
-            body: 'The Claude desktop app (Mac/Windows) includes Claude Code with full file system access and no terminal required.',
-          },
+        type: 'paragraph',
+        text: 'Hooks are shell commands defined in .claude/settings.json that run automatically when Claude Code events fire. They let you enforce standards, trigger side effects, or block actions — without relying on Claude\'s judgment.',
+      },
+      {
+        type: 'table',
+        header: ['Hook Event', 'When It Fires'],
+        rows: [
+          ['PreToolUse', 'Before any tool call executes — can block it by exiting non-zero'],
+          ['PostToolUse', 'After a tool call completes — receives the tool result'],
+          ['Notification', 'When Claude Code emits a user-facing notification'],
+          ['Stop', 'When the main agent finishes its turn'],
+          ['SubagentStop', 'When a subagent finishes its turn'],
         ],
-      },
-      {
-        type: 'paragraph',
-        text: 'All IDE integrations share the same CLAUDE.md context, .claude/settings.json permissions, and hooks configuration as the CLI. Settings changed in one surface apply everywhere.',
-      },
-    ],
-  },
-
-  // ── MCP SERVERS ──────────────────────────────────────────────────────────────
-  {
-    id: 'mcp',
-    label: 'MCP Servers',
-    icon: '🔌',
-    description: 'Model Context Protocol — extend Claude Code with custom tool servers.',
-    content: [
-      {
-        type: 'paragraph',
-        text: 'MCP (Model Context Protocol) is an open standard for connecting language models to external tools and data sources. You run an MCP server (a local process), and Claude Code connects to it — gaining access to its tools like any built-in tool.',
       },
       {
         type: 'code',
-        text: `# .claude/settings.json — register an MCP server
+        text: `# .claude/settings.json — hook configuration
 {
-  "mcpServers": {
-    "my-db-server": {
-      "command": "node",
-      "args": ["./mcp-servers/database.js"],
-      "env": {
-        "DATABASE_URL": "postgres://localhost/mydb"
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [{
+          "type": "command",
+          "command": "echo '[Hook] Bash tool called' >> ~/.claude/bash-audit.log"
+        }]
       }
-    },
-    "filesystem": {
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/home/user/projects"]
-    }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [{
+          "type": "command",
+          "command": "npx prettier --write $CLAUDE_TOOL_INPUT_FILE_PATH 2>/dev/null || true"
+        }]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [{
+          "type": "command",
+          "command": "osascript -e 'display notification \"Claude finished\" with title \"Claude Code\"'"
+        }]
+      }
+    ]
   }
 }`,
       },
       {
-        type: 'table',
-        header: ['MCP Server', 'What It Provides'],
-        rows: [
-          ['@mcp/filesystem', 'Read/write local files beyond the project directory'],
-          ['@mcp/postgres', 'Query a PostgreSQL database with natural language'],
-          ['@mcp/github', 'Full GitHub API — issues, PRs, repos, actions'],
-          ['@mcp/brave-search', 'Web search via Brave Search API'],
-          ['Custom server', 'Any tool you implement using the MCP SDK'],
+        type: 'cards',
+        items: [
+          {
+            title: 'matcher field',
+            color: 'blue',
+            body: 'A regex matched against the tool name. "Bash" matches only Bash; "Edit|Write" matches either. Omit matcher to fire on every tool call.',
+          },
+          {
+            title: 'Exit code controls blocking',
+            color: 'red',
+            body: 'For PreToolUse, exiting with a non-zero code blocks the tool from running. Use this to enforce allow/deny rules beyond the built-in permissions system.',
+          },
+          {
+            title: 'Environment variables',
+            color: 'green',
+            body: 'Hooks receive context via env vars: CLAUDE_TOOL_NAME, CLAUDE_TOOL_INPUT_FILE_PATH, CLAUDE_SESSION_ID, and others depending on the event.',
+          },
+          {
+            title: '/hooks slash command',
+            color: 'purple',
+            body: 'Run /hooks inside a session to view all active hook configurations, their matchers, and which events they are registered for.',
+          },
         ],
       },
     ],
   },
 
-  // ── MEMORY SYSTEM ────────────────────────────────────────────────────────────
+  // ── TOOLS REFERENCE ──────────────────────────────────────────────────────────
   {
-    id: 'memory',
-    label: 'Memory System',
-    icon: '💾',
-    description: 'Claude Code\'s file-based persistent memory across sessions.',
+    id: 'tools',
+    label: 'Tools Reference',
+    icon: '🔧',
+    description: 'Built-in tools Claude Code can call during a session, and how to control access to them.',
     content: [
       {
         type: 'paragraph',
-        text: 'Claude Code maintains a persistent memory system at ~/.claude/projects/<project-hash>/memory/. Memories are markdown files with YAML frontmatter, indexed in a MEMORY.md file that is loaded into every session.',
-      },
-      {
-        type: 'code',
-        text: `# Memory file format (e.g. memory/feedback_commits.md)
----
-name: Commit style preference
-description: User prefers conventional commits with scope
-type: feedback
----
-
-Always use conventional commit format: type(scope): message
-Why: User enforces it in CI and wants consistency across sessions.
-How to apply: Default to this on every /commit call.`,
+        text: 'Claude Code has a set of built-in tools it can call to read files, run commands, search code, and browse the web. You can restrict, allow, or block specific tools using flags or settings.',
       },
       {
         type: 'table',
-        header: ['Memory Type', 'What to Store'],
+        header: ['Tool', 'What It Does'],
         rows: [
-          ['user', 'Role, expertise level, collaboration preferences'],
-          ['feedback', 'Corrections and validated approaches from past sessions'],
-          ['project', 'Goals, constraints, decisions, deadlines'],
-          ['reference', 'Pointers to external systems (Jira, Linear, Grafana, Slack)'],
+          ['Bash', 'Execute shell commands in the project directory'],
+          ['Read', 'Read file contents — supports text, images, PDFs, and Jupyter notebooks'],
+          ['Write', 'Create or overwrite a file with new content'],
+          ['Edit', 'Make targeted string replacements in an existing file (diff-based)'],
+          ['Glob', 'Find files by glob pattern, sorted by modification time'],
+          ['Grep', 'Search file contents with ripgrep regex patterns'],
+          ['Agent', 'Spawn a subagent to handle a subtask; optionally in an isolated worktree'],
+          ['WebFetch', 'Fetch and read a URL (HTML, JSON, plain text)'],
+          ['WebSearch', 'Search the web and return a summary of results'],
+          ['NotebookEdit', 'Edit cells in a Jupyter notebook (.ipynb)'],
+          ['mcp__<server>__<tool>', 'Any tool exposed by a registered MCP server'],
+        ],
+      },
+      {
+        type: 'code',
+        text: `# Restrict tools via CLI flags
+claude --tools "Bash,Edit,Read"          # Only these tools available
+claude --tools ""                         # Disable all tools
+claude --tools "default"                  # All tools (explicit default)
+
+# Allow specific patterns without prompting (settings.json)
+{
+  "permissions": {
+    "allow": [
+      "Bash(git log *)",
+      "Bash(git diff *)",
+      "Read"
+    ],
+    "deny": [
+      "Bash(rm *)",
+      "Bash(curl *)"
+    ]
+  }
+}`,
+      },
+      {
+        type: 'cards',
+        items: [
+          {
+            title: 'Permission modes',
+            color: 'blue',
+            body: 'default — prompts for risky tools. acceptEdits — auto-approves file edits. plan — read-only, no writes. bypassPermissions — skips all prompts (use carefully).',
+          },
+          {
+            title: '--allowedTools vs --tools',
+            color: 'green',
+            body: '--tools restricts which tools exist in the session. --allowedTools controls which of those run without a permission prompt. They serve different purposes.',
+          },
+          {
+            title: 'Permission rule syntax',
+            color: 'purple',
+            body: 'Rules support glob-style patterns: "Bash(git *)" matches any git command. "Read" matches any Read call. Deny rules take precedence over allow rules.',
+          },
+          {
+            title: '/permissions command',
+            color: 'orange',
+            body: 'Run /permissions inside a session to view, add, or remove allow/deny rules interactively without editing settings.json by hand.',
+          },
+        ],
+      },
+    ],
+  },
+
+  // ── INTERACTIVE MODE ─────────────────────────────────────────────────────────
+  {
+    id: 'interactive',
+    label: 'Interactive Mode',
+    icon: '⌨️',
+    description: 'Keyboard shortcuts, input modes, and session features for interactive Claude Code sessions.',
+    content: [
+      {
+        type: 'paragraph',
+        text: 'Interactive mode is the default when you run claude without -p. It keeps a live session open where you type prompts, Claude responds, and conversation history accumulates. Several keyboard shortcuts and modes change how you interact.',
+      },
+      {
+        type: 'table',
+        header: ['Shortcut', 'Action'],
+        rows: [
+          ['Enter', 'Submit the current prompt'],
+          ['Shift+Enter', 'Insert a newline without submitting (configure with /terminal-setup)'],
+          ['Ctrl+C', 'Cancel the current in-progress response'],
+          ['Ctrl+C (at empty prompt)', 'Exit the session'],
+          ['Ctrl+L', 'Clear the terminal screen (conversation history preserved)'],
+          ['Up / Down arrows', 'Navigate prompt history'],
+          ['Tab', 'Autocomplete slash commands'],
+          ['Shift+Tab', 'Cycle through permission modes: default → acceptEdits → plan → bypassPermissions'],
+          ['Esc', 'Cancel a multi-line edit or dismiss a dialog'],
+        ],
+      },
+      {
+        type: 'table',
+        header: ['Permission Mode', 'Behaviour'],
+        rows: [
+          ['default', 'Prompts before risky tool calls (file writes, shell commands)'],
+          ['acceptEdits', 'Auto-approves all file edits without prompting; still prompts for Bash'],
+          ['plan', 'Read-only — Claude can read and search but cannot write files or run commands'],
+          ['auto', 'Classifier decides automatically; skips prompts for low-risk actions (Team/Enterprise/API plans only)'],
+          ['bypassPermissions', 'Skips all permission prompts — use only in trusted, sandboxed environments'],
         ],
       },
       {
         type: 'cards',
         items: [
           {
-            title: 'MEMORY.md is the index',
+            title: 'Vim editing mode',
             color: 'blue',
-            body: 'Each entry is one line under ~150 chars. Lines past 200 are truncated. Keep it concise — it loads into every session.',
+            body: 'Enable Vim keybindings for the prompt input via /config → Editor mode. Normal, Insert, and Visual modes work as expected. Esc enters Normal mode.',
           },
           {
-            title: 'Save immediately',
+            title: 'Multi-line input',
             color: 'green',
-            body: 'Write a memory as soon as you learn something worth keeping. Don\'t wait — context you have now may be gone next session.',
+            body: 'Use Shift+Enter to write multi-line prompts or paste code blocks before submitting. Run /terminal-setup if Shift+Enter doesn\'t work in your terminal.',
           },
           {
-            title: 'Verify before citing',
+            title: 'Context tracking',
+            color: 'purple',
+            body: 'Run /context to see a visual grid of context usage. When context fills up, use /compact to summarise the conversation and reclaim space without starting over.',
+          },
+          {
+            title: 'Session persistence',
             color: 'orange',
-            body: 'Memories can go stale. Before recommending a file path or function name from memory, verify it still exists in the current code.',
-          },
-          {
-            title: 'What NOT to save',
-            color: 'gray',
-            body: 'Skip code architecture (read the code), git history (use git log), debugging recipes (the fix is in the code), and in-progress task state.',
+            body: 'Sessions are saved automatically and can be resumed with claude -c (most recent) or claude -r "<name>" (by name). Name a session with /rename or -n flag.',
           },
         ],
       },

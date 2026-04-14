@@ -9,7 +9,7 @@ interface HomePageProps {
 // ─── Tab navigation cards ────────────────────────────────────────────────────
 const NAV_CARDS = [
   { id: 'agent',    label: 'Agent',    icon: '🤖', color: 'from-blue-500 to-blue-600',   desc: 'AI agent learning path & courses' },
-  { id: 'hardness', label: 'Hardness', icon: '🧠', color: 'from-violet-500 to-purple-600', desc: 'Concept reference by difficulty' },
+  { id: 'claude',   label: 'Claude',   icon: '🤖', color: 'from-indigo-500 to-blue-600',   desc: 'Model family, config, workflows & settings' },
   { id: 'mds',      label: '.MDs',     icon: '📄', color: 'from-orange-400 to-rose-500',  desc: 'Claude Code documentation' },
   { id: 'clis',     label: 'CLIs',     icon: '💻', color: 'from-emerald-500 to-green-600', desc: 'CLI commands & tools reference' },
 ]
