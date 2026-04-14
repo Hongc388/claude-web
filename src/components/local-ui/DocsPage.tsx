@@ -1,509 +1,563 @@
 import { useState } from 'react'
 import type { ReactNode } from 'react'
 import CodeBlock from '@/components/ui/CodeBlock'
-import DocSection from '@/components/ui/DocSection'
-import HoverCard from '@/components/ui/HoverCard'
+import modelAbilityImg from '@/asset/model-ability.png'
 
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
+// =============================================================================
+// CONTENT DATA — edit this section to update page content
+//
+// Each section has an `id`, `label`, `icon`, `description`, and `content` array.
+// Content block types:
+//   { type: 'paragraph', text: '...' }
+//   { type: 'code', text: '...' }
+//   { type: 'cards', items: [{ title, color, body }] }
+//   { type: 'table', header: ['Col1', 'Col2'], rows: [['cell', 'cell'], ...] }
+//   { type: 'image', src: importedImg, alt: '...', caption: '...' }
+//
+// Card colors: 'blue' | 'green' | 'purple' | 'orange' | 'red' | 'gray'
+// =============================================================================
 
-interface DocSectionNav {
+type CardColor = 'blue' | 'green' | 'purple' | 'orange' | 'red' | 'gray'
+
+type ContentBlock =
+  | { type: 'paragraph'; text: string }
+  | { type: 'code'; text: string }
+  | { type: 'cards'; items: { title: string; color: CardColor; body: string }[] }
+  | { type: 'table'; header: [string, string]; rows: [string, string][] }
+  | { type: 'image'; src: string; alt: string; caption?: string }
+
+interface DocSection {
   id: string
-  label: string
-}
-
-interface AgentInfo {
-  name: string
-  color: string
-  desc: string
-  use: string
-}
-
-interface SecurityPractice {
-  title: string
-  content: string
-}
-
-interface TroubleshootIssue {
-  error: string
-  title: string
-  fix: string
-}
-
-interface ShortcutGroup {
-  title: string
-  rows: [string, string][]
-}
-
-interface Capability {
   label: string
   icon: string
   description: string
-  imageSrc: string
+  content: ContentBlock[]
 }
 
-// ---------------------------------------------------------------------------
-// Constants
-// ---------------------------------------------------------------------------
+const SECTIONS: DocSection[] = [
+  // ── HOME ────────────────────────────────────────────────────────────────────
+  {
+    id: 'home',
+    label: 'Home',
+    icon: '🏠',
+    description: 'Welcome to Claude Code — Anthropic\'s official AI coding assistant.',
+    content: [
+      {
+        type: 'paragraph',
+        text: 'Claude Code is Anthropic\'s official CLI and IDE extension for AI-powered development. It integrates directly into your terminal, VS Code, JetBrains, and more — letting Claude read, write, and run code alongside you.',
+      },
+      {
+        type: 'paragraph',
+        text: 'Core capabilities: code generation, file operations, git integration, multi-agent task delegation, custom hooks, and configurable permission controls.',
+      },
+      {
+        type: 'cards',
+        items: [
+          {
+            title: 'Code Generation',
+            color: 'blue',
+            body: 'Generate code in any language from natural-language prompts. Claude reads surrounding files to match your project style and conventions.',
+          },
+          {
+            title: 'Git Integration',
+            color: 'green',
+            body: 'Auto-generates commit messages, manages branches, and integrates with the gh CLI for pull requests and issues.',
+          },
+          {
+            title: 'Multi-Agent',
+            color: 'purple',
+            body: 'Spawn specialized sub-agents in parallel for research, planning, and execution without blocking your main session.',
+          },
+          {
+            title: 'Security Controls',
+            color: 'red',
+            body: 'Sandbox filesystem and network access with explicit allow/deny permission rules and hooks for auditing every tool call.',
+          },
+        ],
+      },
+      {
+        type: 'table',
+        header: ['Model', 'Best For'],
+        rows: [
+          ['claude-haiku-4-5', 'Fast tasks, simple queries, high-volume operations'],
+          ['claude-sonnet-4-6', 'Most development work — balanced speed and capability'],
+          ['claude-opus-4-6', 'Complex reasoning, architecture decisions, deep analysis'],
+        ],
+      },
+      {
+        type: 'image',
+        src: modelAbilityImg,
+        alt: 'Claude model ability benchmark comparison',
+        caption: 'Claude 3 benchmark performance across reasoning, vision, and science tasks compared to GPT-4V and Gemini.',
+      },
+    ],
+  },
 
-const DOC_SECTIONS: DocSectionNav[] = [
-  { id: 'overview', label: 'Overview' },
-  { id: 'install', label: 'Installation' },
-  { id: 'commands', label: 'Commands' },
-  { id: 'shortcuts', label: 'Shortcuts' },
-  { id: 'config', label: 'Configuration' },
-  { id: 'agents', label: 'Agents' },
-  { id: 'git', label: 'Git Integration' },
-  { id: 'security', label: 'Security' },
-  { id: 'troubleshoot', label: 'Troubleshooting' },
-]
+  // ── GUIDES ──────────────────────────────────────────────────────────────────
+  {
+    id: 'guides',
+    label: 'Guides',
+    icon: '📖',
+    description: 'Installation, setup, common commands, and everyday workflows.',
+    content: [
+      {
+        type: 'paragraph',
+        text: 'Install Claude Code globally, authenticate with your Anthropic token, and initialize a project. The /init command creates a CLAUDE.md file and .claude/ directory for project-level settings.',
+      },
+      {
+        type: 'code',
+        text: 'npm install -g @anthropic-ai/claude-code\nexport ANTHROPIC_AUTH_TOKEN="your-token-here"\nclaude init',
+      },
+      {
+        type: 'paragraph',
+        text: 'Slash commands available inside a Claude Code session:',
+      },
+      {
+        type: 'table',
+        header: ['Command', 'Description'],
+        rows: [
+          ['/help', 'Show help and all available commands'],
+          ['/clear', 'Clear conversation history'],
+          ['/commit', 'Auto-generate a git commit message'],
+          ['/init', 'Initialize CLAUDE.md for this project'],
+          ['/simplify', 'Review and optimize recently changed code'],
+          ['/loop 5m /cmd', 'Run a command on a recurring interval'],
+          ['/debug', 'Enable debug logging'],
+          ['/fast', 'Toggle faster output mode'],
+        ],
+      },
+      {
+        type: 'paragraph',
+        text: 'Typical feature development workflow:',
+      },
+      {
+        type: 'code',
+        text: 'git checkout -b feature/my-feature\nclaude\n> Implement user authentication with JWT\nclaude /simplify\nclaude /commit\ngit push -u origin feature/my-feature',
+      },
+      {
+        type: 'paragraph',
+        text: 'Useful CLI flags when launching Claude Code:',
+      },
+      {
+        type: 'table',
+        header: ['Flag', 'Description'],
+        rows: [
+          ['--model <model>', 'Set model: opus, sonnet, or haiku'],
+          ['--debug', 'Enable debug mode with full request/response logs'],
+          ['--verbose', 'Show detailed output'],
+          ['--quiet', 'Suppress non-essential output'],
+          ['--max-tokens <n>', 'Limit response token count'],
+          ['--timeout <ms>', 'Request timeout in ms (default 120000)'],
+        ],
+      },
+    ],
+  },
 
-// ---------------------------------------------------------------------------
-// Section Components
-// ---------------------------------------------------------------------------
+  // ── HOOKS ───────────────────────────────────────────────────────────────────
+  {
+    id: 'hooks',
+    label: 'Hooks',
+    icon: '🪝',
+    description: 'Automate actions before and after Claude Code events.',
+    content: [
+      {
+        type: 'paragraph',
+        text: 'Hooks are shell commands that execute automatically in response to Claude Code lifecycle events. They let you enforce policies, run tests, send notifications, or audit Claude\'s actions without manual intervention.',
+      },
+      {
+        type: 'paragraph',
+        text: 'Define hooks in .claude/settings.json under the "hooks" key. Each hook specifies a "run" command that is executed in your project root.',
+      },
+      {
+        type: 'code',
+        text: `{
+  "hooks": {
+    "pre-git-push":    { "run": "npm run lint && npm run test" },
+    "post-git-commit": { "run": "echo 'Committed successfully'" },
+    "pre-file-write":  { "run": "echo 'About to write a file'" },
+    "post-file-write": { "run": "npx tsc --noEmit" },
+    "pre-tool-call":   { "run": "echo 'Tool call starting'" },
+    "post-tool-call":  { "run": "echo 'Tool call completed'" }
+  }
+}`,
+      },
+      {
+        type: 'cards',
+        items: [
+          {
+            title: 'pre-git-push',
+            color: 'blue',
+            body: 'Runs before every git push. Use it to block pushes that fail lint or tests.',
+          },
+          {
+            title: 'post-git-commit',
+            color: 'green',
+            body: 'Runs after a commit completes. Good for changelog updates or Slack notifications.',
+          },
+          {
+            title: 'pre-file-write',
+            color: 'purple',
+            body: 'Runs before any file write. Use it to validate paths or log what Claude is about to change.',
+          },
+          {
+            title: 'post-file-write',
+            color: 'orange',
+            body: 'Runs after a file is written. Good for triggering type-checks or formatting.',
+          },
+          {
+            title: 'pre-tool-call',
+            color: 'red',
+            body: 'Runs before every tool call. Use for auditing or rate-limiting Claude\'s actions.',
+          },
+          {
+            title: 'post-tool-call',
+            color: 'gray',
+            body: 'Runs after every tool call completes. Useful for logging or downstream automation.',
+          },
+        ],
+      },
+      {
+        type: 'paragraph',
+        text: 'Hook commands run in your project root and have access to all environment variables. If a pre- hook exits with a non-zero status, the corresponding action is blocked.',
+      },
+    ],
+  },
 
-function OverviewSection(): ReactNode {
-  return (
-    <div className="space-y-4">
-      <h3 className="text-xl font-bold text-gray-900">Overview</h3>
-      <p className="text-gray-600">Claude Code CLI is Anthropic's official command-line interface for Claude, providing developers with AI-powered assistance directly in their terminal. It supports multiple interfaces including terminal, desktop app, web app, and IDE extensions.</p>
-      <div className="overflow-x-auto">
-        <table className="w-full text-sm border-collapse">
-          <thead>
-            <tr className="bg-gray-50">
-              <th className="text-left px-4 py-2 border border-gray-200">Model</th>
-              <th className="text-left px-4 py-2 border border-gray-200">Speed</th>
-              <th className="text-left px-4 py-2 border border-gray-200">Capability</th>
-              <th className="text-left px-4 py-2 border border-gray-200">Best For</th>
-            </tr>
-          </thead>
-          <tbody>
-            {([
-              ['Haiku', 'Fast', 'Basic', 'Quick tasks, simple queries'],
-              ['Sonnet', 'Medium', 'High', 'Most development work'],
-              ['Opus', 'Slow', 'Maximum', 'Complex reasoning, architecture'],
-            ] as const).map(([m, s, c, b]) => (
-              <tr key={m} className="border-b border-gray-100">
-                <td className="px-4 py-2 border border-gray-200 font-mono text-blue-700">{m}</td>
-                <td className="px-4 py-2 border border-gray-200">{s}</td>
-                <td className="px-4 py-2 border border-gray-200">{c}</td>
-                <td className="px-4 py-2 border border-gray-200 text-gray-600">{b}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  )
-}
-
-function InstallSection(): ReactNode {
-  return (
-    <div className="space-y-4">
-      <h3 className="text-xl font-bold text-gray-900">Installation & Setup</h3>
-      <div className="space-y-3">
-        <p className="font-semibold text-gray-700">Global Installation (Recommended)</p>
-        <CodeBlock>npm install -g @anthropic-ai/claude-code</CodeBlock>
-        <p className="font-semibold text-gray-700">Project-Specific Installation</p>
-        <CodeBlock>npm install --save-dev @anthropic-ai/claude-code</CodeBlock>
-        <p className="font-semibold text-gray-700">Initialize New Project</p>
-        <CodeBlock>claude init</CodeBlock>
-        <p className="text-sm text-gray-600">
-          Creates: <code className="bg-gray-100 px-1 rounded">.claude/</code> directory,{' '}
-          <code className="bg-gray-100 px-1 rounded">CLAUDE.md</code>, and default{' '}
-          <code className="bg-gray-100 px-1 rounded">settings.json</code>
-        </p>
-        <p className="font-semibold text-gray-700">Authentication via Environment Variable</p>
-        <CodeBlock>export ANTHROPIC_AUTH_TOKEN="your-token-here"</CodeBlock>
-      </div>
-    </div>
-  )
-}
-
-function CommandsSection(): ReactNode {
-  const slashCommands: [string, string][] = [
-    ['/help', 'Show help & available commands'],
-    ['/clear', 'Clear conversation history'],
-    ['/exit', 'Exit Claude Code CLI'],
-    ['/commit', 'Auto-generate git commit message'],
-    ['/init', 'Initialize CLAUDE.md documentation'],
-    ['/simplify', 'Review & optimize changed code'],
-    ['/debug', 'Enable debug logging'],
-    ['/loop 5m /cmd', 'Run a command on recurring interval'],
-    ['/claude-api', 'Claude API / Anthropic SDK assistance'],
-  ]
-  const cliFlags: [string, string][] = [
-    ['--help', 'Show help'],
-    ['--version', 'Display version'],
-    ['--config <path>', 'Custom config file'],
-    ['--debug', 'Enable debug mode'],
-    ['--verbose', 'Detailed output'],
-    ['--quiet', 'Suppress verbose output'],
-    ['--model <model>', 'Specify model (opus/sonnet/haiku)'],
-    ['--timeout <ms>', 'Request timeout (default 120000)'],
-    ['--max-tokens <n>', 'Limit response tokens'],
-  ]
-  return (
-    <div className="space-y-4">
-      <h3 className="text-xl font-bold text-gray-900">Commands</h3>
-      <p className="font-semibold text-gray-500 text-sm uppercase tracking-wide">Slash Commands</p>
-      <div className="overflow-x-auto">
-        <table className="w-full text-sm border-collapse">
-          <thead><tr className="bg-gray-50"><th className="text-left px-4 py-2 border border-gray-200">Command</th><th className="text-left px-4 py-2 border border-gray-200">Description</th></tr></thead>
-          <tbody>
-            {slashCommands.map(([cmd, desc]) => (
-              <tr key={cmd} className="border-b border-gray-100">
-                <td className="px-4 py-2 border border-gray-200 font-mono text-purple-700 whitespace-nowrap">{cmd}</td>
-                <td className="px-4 py-2 border border-gray-200 text-gray-600">{desc}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-      <p className="font-semibold text-gray-500 text-sm uppercase tracking-wide mt-4">CLI Flags</p>
-      <div className="overflow-x-auto">
-        <table className="w-full text-sm border-collapse">
-          <thead><tr className="bg-gray-50"><th className="text-left px-4 py-2 border border-gray-200">Flag</th><th className="text-left px-4 py-2 border border-gray-200">Description</th></tr></thead>
-          <tbody>
-            {cliFlags.map(([flag, desc]) => (
-              <tr key={flag} className="border-b border-gray-100">
-                <td className="px-4 py-2 border border-gray-200 font-mono text-blue-700 whitespace-nowrap">{flag}</td>
-                <td className="px-4 py-2 border border-gray-200 text-gray-600">{desc}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  )
-}
-
-function ShortcutsSection(): ReactNode {
-  const groups: ShortcutGroup[] = [
-    { title: 'General Shortcuts', rows: [['!', 'Bash Mode'], ['/', 'Commannds'], ['@', 'File Path'], ['&', 'For Background'], ['Ctrl+C', 'Cancel current operation']] },
-    { title: 'Session Control', rows: [['Ctrl+C', 'Cancel current operation'], ['Ctrl+D', 'Exit Claude Code CLI'], ['Ctrl+L', 'Clear screen'], ['↑ / ↓', 'Navigate command history'], ['Tab', 'Auto-complete commands']] },
-    { title: 'Editing', rows: [['Ctrl+A', 'Move to beginning of line'], ['Ctrl+E', 'Move to end of line'], ['Ctrl+U', 'Delete to beginning of line'], ['Ctrl+K', 'Delete to end of line'], ['Ctrl+W', 'Delete word'], ['Ctrl+Y', 'Paste deleted text'], ['Double Tap Esc', 'Clear the Input']] },
-    { title: 'Search', rows: [['Ctrl+R', 'Search command history'], ['Ctrl+S', 'Forward search'], ['Ctrl+F', 'Search within files']] },
-  ]
-  return (
-    <div className="space-y-4">
-      <h3 className="text-xl font-bold text-gray-900">Keyboard Shortcuts</h3>
-      {groups.map(({ title, rows }) => (
-        <div key={title}>
-          <p className="font-semibold text-gray-700 mb-2">{title}</p>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm border-collapse">
-              <thead><tr className="bg-gray-50"><th className="text-left px-4 py-2 border border-gray-200">Shortcut</th><th className="text-left px-4 py-2 border border-gray-200">Action</th></tr></thead>
-              <tbody>
-                {rows.map(([k, v]) => (
-                  <tr key={k} className="border-b border-gray-100">
-                    <td className="px-4 py-2 border border-gray-200 font-mono text-orange-600">{k}</td>
-                    <td className="px-4 py-2 border border-gray-200 text-gray-600">{v}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      ))}
-    </div>
-  )
-}
-
-function ConfigSection(): ReactNode {
-  return (
-    <div className="space-y-4">
-      <h3 className="text-xl font-bold text-gray-900">Configuration System</h3>
-      <p className="text-gray-600">Config is loaded in priority order (highest to lowest): CLI flags → <code className="bg-gray-100 px-1 rounded">settings.local.json</code> → <code className="bg-gray-100 px-1 rounded">settings.json</code> → global settings.</p>
-      <DocSection title="File Locations">
-        <CodeBlock>{`~/.claude/settings.json          # Global defaults
-~/.claude/settings.local.json   # User overrides
-.claude/settings.json            # Project defaults
-.claude/settings.local.json     # Project overrides
-CLAUDE.md                        # Project documentation`}</CodeBlock>
-      </DocSection>
-      <DocSection title="Permissions">
-        <CodeBlock>{`{
+  // ── PERMISSIONS ─────────────────────────────────────────────────────────────
+  {
+    id: 'permissions',
+    label: 'Permissions',
+    icon: '🔒',
+    description: 'Control exactly what Claude Code is allowed to read, write, and execute.',
+    content: [
+      {
+        type: 'paragraph',
+        text: 'Claude Code uses a deny-by-default permission model. You explicitly list what Claude is allowed to do. Config is resolved in priority order (highest wins): CLI flags → settings.local.json → settings.json → global ~/.claude/settings.json.',
+      },
+      {
+        type: 'code',
+        text: `{
   "permissions": {
     "allow": [
       "Bash(command:git)",
       "Bash(command:npm)",
+      "Read(path:./src)",
+      "Write(path:./src)",
       "WebFetch(domain:github.com)"
     ],
     "deny": [
       "Bash(command:rm -rf)",
+      "Write(path:.env)",
       "WebFetch(domain:*)"
     ]
   }
-}`}</CodeBlock>
-      </DocSection>
-      <DocSection title="Hooks">
-        <CodeBlock>{`{
-  "hooks": {
-    "pre-git-push": { "run": "npm run lint && npm run test" },
-    "post-git-commit": { "run": "echo 'Committed!'" },
-    "pre-file-write": { "run": "echo 'Writing file...'" }
-  }
-}`}</CodeBlock>
-      </DocSection>
-      <DocSection title="Sandbox">
-        <CodeBlock>{`{
+}`,
+      },
+      {
+        type: 'table',
+        header: ['Category', 'What It Controls'],
+        rows: [
+          ['Bash', 'Shell commands Claude may execute'],
+          ['Read', 'File paths Claude may read'],
+          ['Write', 'File paths Claude may create or overwrite'],
+          ['Edit', 'File paths Claude may modify in-place'],
+          ['WebFetch', 'Domains Claude may send HTTP requests to'],
+        ],
+      },
+      {
+        type: 'paragraph',
+        text: 'Sandbox mode provides filesystem and network isolation on top of permission rules:',
+      },
+      {
+        type: 'code',
+        text: `{
   "sandbox": {
     "enabled": true,
     "filesystem": {
-      "read": { "allow": ["./src"], "deny": [".env"] },
-      "write": { "allow": ["./dist"], "deny": ["./src"] }
+      "read":  { "allow": ["./src", "./docs"], "deny": [".env", "*.key"] },
+      "write": { "allow": ["./dist", "./src"], "deny": [".env"] }
     },
     "network": {
-      "allowedHosts": ["github.com", "registry.npmjs.org"]
+      "allowedHosts": ["github.com", "registry.npmjs.org", "api.anthropic.com"]
     }
   }
-}`}</CodeBlock>
-      </DocSection>
-    </div>
-  )
-}
+}`,
+      },
+      {
+        type: 'paragraph',
+        text: 'Best practice: start with a locked-down config and expand allowances as needed. Use settings.local.json (gitignored) for personal overrides that shouldn\'t be committed.',
+      },
+    ],
+  },
 
-function AgentsSection(): ReactNode {
-  const agents: AgentInfo[] = [
-    { name: 'General-Purpose', color: 'blue', desc: 'Complex multi-step tasks, autonomous execution. Has access to all tools.', use: 'Complex research, multi-step code gen, autonomous problem-solving' },
-    { name: 'Explore', color: 'green', desc: 'Fast codebase exploration. No write/edit tools.', use: 'Finding files, searching keywords, understanding structure' },
-    { name: 'Plan', color: 'purple', desc: 'Software architect for designing implementation plans.', use: 'Planning strategies, identifying critical files, architecture trade-offs' },
-    { name: 'Quant Research', color: 'orange', desc: 'Specialized for quantitative trading research and financial algorithms.', use: 'Alpha signals, backtesting, risk models, academic research' },
-  ]
-  return (
-    <div className="space-y-4">
-      <h3 className="text-xl font-bold text-gray-900">Agent System</h3>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {agents.map(({ name, color, desc, use }) => (
-          <div key={name} className={`border border-${color}-200 bg-${color}-50 rounded-xl p-4`}>
-            <h4 className={`font-bold text-${color}-800 mb-1`}>{name}</h4>
-            <p className="text-sm text-gray-600 mb-2">{desc}</p>
-            <p className="text-xs text-gray-500"><span className="font-medium">Use when:</span> {use}</p>
-          </div>
-        ))}
-      </div>
-      <p className="font-semibold text-gray-700 mt-2">Agent Commands</p>
-      <CodeBlock>{`claude agent general-purpose "Fix authentication bug"
-claude agent explore --thoroughness medium
-claude agent send <agent-id> "Update the report"
+  // ── CONTEXT MANAGEMENT ──────────────────────────────────────────────────────
+  {
+    id: 'context',
+    label: 'Context Management',
+    icon: '🧠',
+    description: 'Manage what Claude knows about your project and conversation.',
+    content: [
+      {
+        type: 'paragraph',
+        text: 'CLAUDE.md is the primary mechanism for persistent project context. It is loaded automatically at the start of every session. You can place it at the project root for global context, or in subdirectories for scoped instructions that only apply in that folder.',
+      },
+      {
+        type: 'paragraph',
+        text: 'What to put in CLAUDE.md: common commands, architecture overview, key design decisions, important constraints, and anything that would take Claude more than 30 seconds to infer from reading the code.',
+      },
+      {
+        type: 'code',
+        text: `# CLAUDE.md — example structure
+
+## Common Commands
+npm run dev          # Start dev server
+npm run build        # Production build
+npx tsc --noEmit     # Type-check
+
+## Architecture
+- React 18 + TypeScript + Vite
+- Tab routing via TAB_COMPONENTS map in App.tsx
+- Data lives in src/data/, accessed only through src/services/
+
+## Important Notes
+- Always use @/ imports from src
+- Never hardcode data in components`,
+      },
+      {
+        type: 'paragraph',
+        text: 'Session-level context controls:',
+      },
+      {
+        type: 'table',
+        header: ['Action', 'Effect'],
+        rows: [
+          ['/clear', 'Wipe conversation history (CLAUDE.md is reloaded fresh)'],
+          ['@filename', 'Explicitly include a file in the current context'],
+          ['--max-tokens <n>', 'Limit response length to avoid context overflow'],
+          ['--model haiku', 'Switch to a model with faster, cheaper context usage'],
+          ['Ctrl+C', 'Cancel the current operation without losing session context'],
+        ],
+      },
+      {
+        type: 'cards',
+        items: [
+          {
+            title: 'Keep CLAUDE.md concise',
+            color: 'blue',
+            body: 'Aim for under 200 lines. The file is loaded into every session — bloated CLAUDE.md wastes context on every turn.',
+          },
+          {
+            title: 'Use /clear between tasks',
+            color: 'green',
+            body: 'Switching from a bug fix to a new feature? Clear the conversation to avoid stale context influencing Claude\'s decisions.',
+          },
+          {
+            title: 'Scope large tasks',
+            color: 'purple',
+            body: 'Break large refactors into small sessions. Each session starts fresh from CLAUDE.md, keeping context lean and focused.',
+          },
+          {
+            title: 'Layer CLAUDE.md files',
+            color: 'orange',
+            body: 'Place a CLAUDE.md in src/api/ with API-specific rules. Claude reads all CLAUDE.md files from root down to the current directory.',
+          },
+        ],
+      },
+    ],
+  },
+
+  // ── AGENT TEAMS ─────────────────────────────────────────────────────────────
+  {
+    id: 'agent-teams',
+    label: 'Agent Teams',
+    icon: '🤖',
+    description: 'Spawn and coordinate multiple specialized agents for complex workflows.',
+    content: [
+      {
+        type: 'paragraph',
+        text: 'Agent Teams let you delegate independent subtasks to specialized sub-agents running in parallel. The main Claude session acts as the orchestrator — coordinating agents, synthesizing results — while sub-agents do the focused work.',
+      },
+      {
+        type: 'cards',
+        items: [
+          {
+            title: 'general-purpose',
+            color: 'blue',
+            body: 'Full access to all tools. Use for complex, multi-step tasks that require autonomous problem-solving and code generation.',
+          },
+          {
+            title: 'explore',
+            color: 'green',
+            body: 'Read-only codebase explorer. No write/edit tools. Use for finding files, searching keywords, and understanding structure without risk.',
+          },
+          {
+            title: 'plan',
+            color: 'purple',
+            body: 'Software architect agent. Use for implementation strategy, identifying critical files, and evaluating architectural trade-offs.',
+          },
+          {
+            title: 'claude-code-guide',
+            color: 'orange',
+            body: 'Answers questions about Claude Code CLI, the Claude API, and the Anthropic SDK. Useful for capability lookups during development.',
+          },
+        ],
+      },
+      {
+        type: 'code',
+        text: `# Spawn an agent for a specific task
+claude agent general-purpose "Fix the authentication bug in src/auth/"
+
+# Send a follow-up message to a running agent
+claude agent send <agent-id> "Also update the corresponding tests"
+
+# Check what an agent is currently doing
 claude agent status <agent-id>
-claude agent stop <agent-id>`}</CodeBlock>
-    </div>
-  )
+
+# Stop an agent
+claude agent stop <agent-id>`,
+      },
+      {
+        type: 'paragraph',
+        text: 'Use worktree isolation (isolation: "worktree") for agents that make file changes. The agent works on a separate git branch, preventing conflicts with your working tree. The branch is cleaned up automatically if no changes are made.',
+      },
+      {
+        type: 'table',
+        header: ['Pattern', 'When to Use'],
+        rows: [
+          ['Single agent', 'Self-contained task that doesn\'t need parallelism'],
+          ['Parallel agents', 'Multiple independent subtasks (e.g., research 4 topics at once)'],
+          ['Orchestrator + sub-agents', 'Complex goal that needs planning then delegated execution'],
+          ['Background agent', 'Long-running task you don\'t need results from immediately'],
+        ],
+      },
+    ],
+  },
+]
+
+// Exported for cross-tab search in HomePage
+export const SECTION_SUMMARIES = SECTIONS.map(({ id, label, description }) => ({ id, label, description }))
+
+// =============================================================================
+// Rendering — no need to edit below this line to update content
+// =============================================================================
+
+const CARD_COLORS: Record<CardColor, { border: string; bg: string; title: string }> = {
+  blue:   { border: 'border-blue-200',   bg: 'bg-blue-50',   title: 'text-blue-800'   },
+  green:  { border: 'border-green-200',  bg: 'bg-green-50',  title: 'text-green-800'  },
+  purple: { border: 'border-purple-200', bg: 'bg-purple-50', title: 'text-purple-800' },
+  orange: { border: 'border-orange-200', bg: 'bg-orange-50', title: 'text-orange-800' },
+  red:    { border: 'border-red-200',    bg: 'bg-red-50',    title: 'text-red-800'    },
+  gray:   { border: 'border-gray-200',   bg: 'bg-gray-50',   title: 'text-gray-800'   },
 }
 
-function GitSection(): ReactNode {
-  return (
-    <div className="space-y-4">
-      <h3 className="text-xl font-bold text-gray-900">Git Integration</h3>
-      <p className="text-gray-600">Claude Code automatically detects git repositories and provides smart commit message generation, branch-aware operations, and conflict resolution assistance.</p>
-      <DocSection title="Feature Development Workflow">
-        <CodeBlock>{`git checkout -b feature/new-feature
-claude
-> Implement user authentication
-claude /simplify
-claude /commit
-git push -u origin feature/new-feature`}</CodeBlock>
-      </DocSection>
-      <DocSection title="GitHub PR & Issue Operations">
-        <CodeBlock>{`# Pull Requests
-gh pr create --title "Fix bug" --body "Description"
-gh pr view 123
-gh pr list
-gh pr merge 123
+function renderBlock(block: ContentBlock, index: number): ReactNode {
+  switch (block.type) {
+    case 'paragraph':
+      return <p key={index} className="text-gray-600 leading-relaxed">{block.text}</p>
 
-# Issues
-gh issue create --title "Bug report" --body "Description"
-gh issue view 456
-gh issue list`}</CodeBlock>
-      </DocSection>
-      <DocSection title="Branch Management">
-        <CodeBlock>{`git checkout -b feature-branch   # Create & switch
-git checkout main                # Switch existing
-git branch -a                    # List all branches
-git remote add origin <url>      # Add remote
-git push -u origin main          # Push branch
-git pull origin main             # Pull changes`}</CodeBlock>
-      </DocSection>
-    </div>
-  )
-}
+    case 'code':
+      return <CodeBlock key={index}>{block.text}</CodeBlock>
 
-function SecuritySection(): ReactNode {
-  const practices: SecurityPractice[] = [
-    { title: '1. Never Commit Secrets', content: 'Add .env, *.key, *.pem, credentials.json to .gitignore' },
-    { title: '2. Use Environment Variables', content: 'Reference secrets via ${API_KEY} in config instead of hardcoding' },
-    { title: '3. Enable Sandbox', content: 'Set sandbox.enabled: true to isolate execution environment' },
-    { title: '4. Principle of Least Privilege', content: 'Deny by default, allow explicitly only what is needed' },
-  ]
-  return (
-    <div className="space-y-4">
-      <h3 className="text-xl font-bold text-gray-900">Security Features</h3>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {practices.map(({ title, content }) => (
-          <div key={title} className="bg-red-50 border border-red-200 rounded-xl p-4">
-            <h4 className="font-bold text-red-800 mb-1">{title}</h4>
-            <p className="text-sm text-gray-600">{content}</p>
-          </div>
-        ))}
-      </div>
-      <DocSection title="Permission Categories">
-        <div className="flex flex-wrap gap-2">
-          {['Bash — Command execution', 'WebFetch — Network requests', 'Read — File reading', 'Write — File writing', 'Edit — File modification'].map((p) => (
-            <span key={p} className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm">{p}</span>
-          ))}
+    case 'cards':
+      return (
+        <div key={index} className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          {block.items.map((item) => {
+            const c = CARD_COLORS[item.color]
+            return (
+              <div key={item.title} className={`border ${c.border} ${c.bg} rounded-xl p-4`}>
+                <h4 className={`font-bold ${c.title} mb-1`}>{item.title}</h4>
+                <p className="text-sm text-gray-600">{item.body}</p>
+              </div>
+            )
+          })}
         </div>
-      </DocSection>
-    </div>
-  )
+      )
+
+    case 'image':
+      return (
+        <figure key={index} className="rounded-xl overflow-hidden border border-gray-200">
+          <img src={block.src} alt={block.alt} className="w-full object-contain" />
+          {block.caption && (
+            <figcaption className="px-4 py-2 bg-gray-50 text-xs text-gray-500 text-center border-t border-gray-200">
+              {block.caption}
+            </figcaption>
+          )}
+        </figure>
+      )
+
+    case 'table':
+      return (
+        <div key={index} className="overflow-x-auto">
+          <table className="w-full text-sm border-collapse">
+            <thead>
+              <tr className="bg-gray-50">
+                <th className="text-left px-4 py-2 border border-gray-200">{block.header[0]}</th>
+                <th className="text-left px-4 py-2 border border-gray-200">{block.header[1]}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {block.rows.map(([a, b]) => (
+                <tr key={a} className="border-b border-gray-100">
+                  <td className="px-4 py-2 border border-gray-200 font-mono text-purple-700 whitespace-nowrap text-xs">{a}</td>
+                  <td className="px-4 py-2 border border-gray-200 text-gray-600">{b}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )
+  }
 }
 
-function TroubleshootSection(): ReactNode {
-  const issues: TroubleshootIssue[] = [
-    { error: 'EPERM: operation not permitted', title: 'Permission Denied', fix: 'Check sandbox settings, update permissions in settings.json, or check macOS Firewall settings.' },
-    { error: 'EADDRINUSE: address already in use', title: 'Cannot Bind to Port', fix: 'Run: lsof -ti:3000 | xargs kill -9  or use a different port with: npm run dev -- --port 3001' },
-    { error: '403: Permission denied', title: 'Authentication Failed', fix: 'Verify token with: echo $ANTHROPIC_AUTH_TOKEN  — generate a new token and update settings.json.' },
-    { error: 'Slow responses', title: 'Slow Response', fix: 'Use haiku model instead of opus, reduce context window, or use background tasks for long operations.' },
-    { error: 'Context too large', title: 'Memory Issues', fix: 'Run /clear to reset conversation, reduce file context, or break into smaller tasks.' },
-  ]
-  return (
-    <div className="space-y-4">
-      <h3 className="text-xl font-bold text-gray-900">Troubleshooting</h3>
-      <div className="space-y-3">
-        {issues.map(({ error, title, fix }) => (
-          <div key={title} className="border border-yellow-200 bg-yellow-50 rounded-xl p-4">
-            <h4 className="font-bold text-yellow-800 mb-1">{title}</h4>
-            <code className="text-xs bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded block mb-2">{error}</code>
-            <p className="text-sm text-gray-600">{fix}</p>
-          </div>
-        ))}
-      </div>
-      <div className="bg-gray-50 rounded-xl p-4">
-        <p className="font-semibold text-gray-700 mb-2">Enable Debug Mode</p>
-        <CodeBlock>claude --debug</CodeBlock>
-        <p className="text-sm text-gray-500 mt-2">Provides: request/response logs, error stack traces, performance metrics, tool execution details.</p>
-      </div>
-    </div>
-  )
-}
-
-// ---------------------------------------------------------------------------
-// Section map & main component
-// ---------------------------------------------------------------------------
-
-type SectionId = typeof DOC_SECTIONS[number]['id']
-
-const SECTION_MAP: Record<string, () => ReactNode> = {
-  overview: OverviewSection,
-  install: InstallSection,
-  commands: CommandsSection,
-  shortcuts: ShortcutsSection,
-  config: ConfigSection,
-  agents: AgentsSection,
-  git: GitSection,
-  security: SecuritySection,
-  troubleshoot: TroubleshootSection,
-}
-
-export default function DocsTab(): ReactNode {
-  const [activeDocSection, setActiveDocSection] = useState<SectionId>('overview')
-  const ActiveSection = SECTION_MAP[activeDocSection]
+export default function DocsPage(): ReactNode {
+  const [activeSectionId, setActiveSectionId] = useState<string>('home')
+  const active = SECTIONS.find(s => s.id === activeSectionId) ?? SECTIONS[0]
 
   return (
     <div className="space-y-4">
       {/* Header */}
       <div className="bg-white rounded-2xl shadow-lg p-8">
-        <div className="flex items-center gap-4 mb-4">
-          <div className="bg-gray-900 text-green-400 p-3 rounded-xl text-2xl font-mono">{'>'}_</div>
+        <div className="flex items-center gap-4 mb-6">
+          {/* Claude-branded icon */}
+          <div className="bg-gradient-to-br from-orange-400 to-rose-500 text-white p-3 rounded-xl w-14 h-14 flex items-center justify-center flex-shrink-0">
+            <svg viewBox="0 0 24 24" fill="none" className="w-7 h-7" aria-hidden="true">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z" fill="white" fillOpacity="0.2"/>
+              <path d="M8 12h8M12 8v8" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+            </svg>
+          </div>
           <div>
-            <h2 className="text-2xl font-bold text-gray-900">Claude Code CLI Documentation</h2>
-            <p className="text-gray-500 text-sm">Version: Claude Sonnet 4.6 — Generated April 1, 2026</p>
+            <h2 className="text-2xl font-bold text-gray-900">Claude Code Documentation</h2>
+            <p className="text-gray-500 text-sm">Anthropic — claude-sonnet-4-6 · claude-opus-4-6 · claude-haiku-4-5</p>
           </div>
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-          {([
-            {
-              label: 'Code Generation',
-              icon: '✍️',
-              description:
-                'Generate code in any language directly from natural-language prompts. Claude reads surrounding files to match your project style and conventions.',
-              imageSrc: '/images/code-generation.png',
-            },
-            {
-              label: 'File Operations',
-              icon: '📁',
-              description:
-                'Read, write, edit, and search across your codebase with dedicated tools. Operations are scoped by sandbox and permission settings.',
-              imageSrc: '/images/file-operations.png',
-            },
-            {
-              label: 'Git Integration',
-              icon: '🔀',
-              description:
-                'Auto-detects git repos, generates commit messages, manages branches, and integrates with the gh CLI for PRs and issues.',
-              imageSrc: '/images/git-integration.png',
-            },
-            {
-              label: 'Multi-Agent System',
-              icon: '🤖',
-              description:
-                'Spawn specialized subagents (general-purpose, explore, plan) in parallel to handle research, planning, and execution independently.',
-              imageSrc: '/images/multi-agent.png',
-            },
-            {
-              label: 'Custom Skills',
-              icon: '🔧',
-              description:
-                'Define reusable skills via slash commands (/commit, /simplify, /loop) that bundle prompts and tools into one-shot workflows.',
-              imageSrc: '/images/custom-skills.png',
-            },
-            {
-              label: 'Security Controls',
-              icon: '🔒',
-              description:
-                'Sandbox filesystem and network access, allow/deny permission rules, and hooks for auditing every tool call.',
-              imageSrc: '/images/security-controls.png',
-            },
-          ] as Capability[]).map((cap) => (
-            <HoverCard
-              key={cap.label}
-              title={cap.label}
-              description={cap.description}
-              imageSrc={cap.imageSrc}
-            >
-              <div className="bg-gray-50 hover:bg-gray-100 rounded-lg px-3 py-2 flex items-center gap-2 text-sm text-gray-700 cursor-pointer transition-colors">
-                <span>{cap.icon}</span>
-                {cap.label}
-              </div>
-            </HoverCard>
-          ))}
-        </div>
-      </div>
 
-      {/* Section Nav */}
-      <div className="bg-white rounded-2xl shadow-lg p-4">
-        <div className="flex flex-wrap gap-2">
-          {DOC_SECTIONS.map((s) => (
+        {/* Section quick-links */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2">
+          {SECTIONS.map((s) => (
             <button
               key={s.id}
-              onClick={() => setActiveDocSection(s.id)}
-              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                activeDocSection === s.id
-                  ? 'bg-gray-900 text-green-400'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              onClick={() => setActiveSectionId(s.id)}
+              className={`flex flex-col items-center gap-1 px-3 py-3 rounded-xl text-sm font-medium transition-colors border ${
+                activeSectionId === s.id
+                  ? 'bg-orange-50 border-orange-300 text-orange-700'
+                  : 'bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100'
               }`}
             >
-              {s.label}
+              <span className="text-xl">{s.icon}</span>
+              <span className="text-xs text-center leading-tight">{s.label}</span>
             </button>
           ))}
         </div>
       </div>
 
-      {/* Section Content */}
-      <div className="bg-white rounded-2xl shadow-lg p-6 space-y-4">
-        <ActiveSection />
+      {/* Section content */}
+      <div className="bg-white rounded-2xl shadow-lg p-6 space-y-5">
+        <div>
+          <h3 className="text-xl font-bold text-gray-900">{active.label}</h3>
+          <p className="text-gray-500 text-sm mt-1">{active.description}</p>
+        </div>
+        <hr className="border-gray-100" />
+        {active.content.map((block, i) => renderBlock(block, i))}
       </div>
     </div>
   )

@@ -6,11 +6,11 @@ export interface Tab {
 }
 
 export const TABS: Tab[] = [
-  { id: 'home', label: 'Home', icon: '🏠' },
-  { id: 'learn', label: 'Learn', icon: '📚' },
-  { id: 'practice', label: 'Practice', icon: '✏️' },
-  { id: 'progress', label: 'Progress', icon: '📊' },
-  { id: 'docs', label: 'CLI Docs', icon: '🤖' },
+  { id: 'home',     label: 'Home',     icon: '🏠' },
+  { id: 'agent',    label: 'Agent',    icon: '🤖' },
+  { id: 'hardness', label: 'Hardness', icon: '🧠' },
+  { id: 'mds',      label: '.MDs',     icon: '📄' },
+  { id: 'clis',     label: 'CLIs',     icon: '💻' },
 ]
 
 // Learning levels

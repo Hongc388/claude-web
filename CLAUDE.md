@@ -1,145 +1,101 @@
-# Educational Web App 
-This is an interactive learning platform built with React 18, TypeScript, Vite, and Tailwind CSS. It provides features for learning modules, practice exercises, progress tracking, and documentation.
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+# Claudipedia
+A **reference dictionary** web app for AI agent and Claude Code concepts — like MDN but for AI agents. Users browse or search to look things up. Built with React 18, TypeScript, Vite, and Tailwind CSS.
 
 ## Common Commands
 
 ```bash
-# Development
 npm run dev          # Start dev server (http://localhost:3000)
 npm run build        # Build for production (output in /dist)
 npm run preview      # Preview production build locally
+npx tsc --noEmit     # Type-check without emitting (no lint script exists)
 ```
 
 ## Architecture & Structure
 
 ### Tech Stack
 - **Framework**: React 18 with TypeScript
-- **Build Tool**: Vite 5 with path alias support (`@` → `/src`)
-- **Styling**: Tailwind CSS + PostCSS
-- **Type Safety**: TypeScript (ES modules)
+- **Build Tool**: Vite 5 with `@` path alias → `/src`
+- **Styling**: Tailwind CSS + PostCSS (primary color defined in CSS: use `primary-600`, `primary-700`)
 
-### Directory Organization
+### Tab Routing
 
-```
-src/
-├── utils/              # Shared utilities, constants, and state management
-│   ├── constants.ts    # App configuration (TABS, difficulty levels, colors)
-│   ├── appState.ts     # User progress state interfaces
-│   └── courseUtils.ts  # Course filtering, search, stats functions
-├── context/            # Global state context
-│   └── AppContext.tsx  # App-level state shape and provider
-├── components/
-│   ├── ui/             # Reusable UI components (CodeBlock, DocSection, HoverCard)
-│   └── local-ui/       # Page-level components (HomePage, LearnPage, etc.)
-├── App.tsx             # Root component with tab routing
-├── main.tsx            # Entry point
-└── index.css           # Global Tailwind styles
-```
+`App.tsx` is a simple tab router — no React Router. `TABS` in `utils/constants.ts` drives both the navigation and the `TAB_COMPONENTS` map that resolves each tab ID to its page component.
 
-### Key Design Patterns
+The five tabs: **Home**, **Agent**, **Hardness**, **.MDs**, **CLIs**.
 
-**Page Components** (in `components/local-ui/`):
-- Each tab is a separate page component (HomePage, LearnPage, PracticePage, ProgressPage, DocsPage)
-- Imported and mapped in App.tsx via `TAB_COMPONENTS` object
-- Tab configuration lives in `utils/constants.ts`
+| Tab | ID | Page Component | Content |
+|-----|----|----------------|---------|
+| Home | `home` | `HomePage` | Search bar, forum, redirect buttons |
+| Agent | `agent` | `AgentPage` | AI agent concepts reference |
+| Hardness | `hardness` | `HardnessPage` | Agent topics grouped by difficulty |
+| .MDs | `mds` | `DocsPage` | Claude Code documentation |
+| CLIs | `clis` | `ClisPage` | Claude Code CLI command reference |
 
-**State Management**:
-- Component-level state via React hooks (useState)
-- Ready for global state via AppContext.tsx
-- User progress tracked in `utils/appState.ts`
+### The DocsPage Pattern (CRITICAL — all non-Home tabs follow this)
 
-**Utilities**:
-- `constants.ts` — Centralized configuration (tabs, difficulty levels, color schemes)
-- `courseUtils.ts` — Pure utility functions for course filtering, searching, stats
-- `appState.ts` — State shape and helper functions for managing user progress
+Every non-Home tab is a **self-contained reference page** that follows `DocsPage.tsx` exactly.
+**Do NOT deviate from this pattern.**
 
-## Data Management
-
-Data flows through a service layer that decouples components from data sources. This makes it easy to swap hardcoded data for API calls later.
-
-### Data Layer Structure
+Structure of every tab page:
 
 ```
-src/
-├── data/                    # Hardcoded data definitions
-│   ├── courses.ts          # Course list (COURSES_DATA)
-│   ├── quizzes.ts          # Quiz list (QUIZZES_DATA)
-│   └── achievements.ts     # Achievement definitions (ACHIEVEMENTS_DATA)
-└── services/                # Service functions for fetching/manipulating data
-    ├── courseService.ts    # fetchAllCourses, fetchCoursesByLevel, etc.
-    ├── quizService.ts      # fetchAllQuizzes, validateAnswer, etc.
-    └── achievementService.ts # fetchAllAchievements, getUserUnlockedAchievements, etc.
+src/components/local-ui/SomePage.tsx
+│
+├── SECTIONS array          ← EDIT HERE to update content
+│   └── each section has: id, label, icon, description, content: ContentBlock[]
+│
+├── ContentBlock types:
+│   ├── { type: 'paragraph'; text: string }
+│   ├── { type: 'code'; text: string }
+│   ├── { type: 'cards'; items: [{ title, color, body }] }
+│   ├── { type: 'table'; header: [string, string]; rows: [string, string][] }
+│   └── { type: 'image'; src: importedImg; alt: string; caption?: string }
+│
+├── CARD_COLORS map         ← colors: blue | green | purple | orange | red | gray
+├── renderBlock()           ← renders any ContentBlock to JSX
+└── Page component          ← header + section nav buttons + active section content
 ```
 
-### How It Works
+The rendering logic is identical across all tab pages. **Only the SECTIONS data changes.**
+See `src/components/local-ui/DocsPage.tsx` as the canonical reference implementation.
 
-1. **Data files** (`src/data/`) contain plain data structures (arrays of objects)
-2. **Service files** (`src/services/`) provide async functions to fetch/query data
-3. **Components** call services via `useEffect`, store results in `useState`, and render
+To add a new tab:
+1. Create `src/components/local-ui/NewPage.tsx` — copy DocsPage.tsx, replace SECTIONS
+2. Add entry to `TABS` in `utils/constants.ts`
+3. Add mapping in `TAB_COMPONENTS` in `App.tsx`
 
-Example:
-```tsx
-// Component
-const [courses, setCourses] = useState<Course[]>([])
+### HomePage (special case)
 
-useEffect(() => {
-  fetchAllCourses().then(setCourses)
-}, [])
-```
+Home does NOT follow the DocsPage pattern. It has three distinct sections:
+1. **Redirect cards** — buttons for each of the 4 non-Home tabs (calls `setActiveTab`)
+2. **Search bar** — searches across Agent (courses content) and Hardness (reference content)
+3. **Forum** — users post questions and answers in real time (no seed data, starts empty)
 
-### Replacing with Real APIs
+`App.tsx` renders `<HomePage setActiveTab={setActiveTab} />` directly (not through `TAB_COMPONENTS`).
 
-To migrate from hardcoded data to an API:
+### Data Layer
 
-1. Update the service function (e.g., `courseService.ts`) to call your API instead of returning hardcoded data
-2. Components don't change — they already handle async loading
-3. Add loading and error states as needed
+**Tab content is NOT served from data files or services.** It lives directly in each page's `SECTIONS` array — this is intentional and keeps content easy to find and edit.
 
-Example:
-```ts
-// Before: Returns hardcoded data
-export async function fetchAllCourses(): Promise<Course[]> {
-  return COURSES_DATA
-}
+`src/data/` contains only type definitions:
+- `src/data/forum.ts` — `ForumPost` / `ForumAnswer` interfaces (state managed in `HomePage`)
 
-// After: Call real API
-export async function fetchAllCourses(): Promise<Course[]> {
-  const response = await fetch('/api/courses')
-  return response.json()
-}
-```
+`src/services/forumService.ts` exists as a stub for a future backend. All other services in `src/services/` are legacy and should not be used.
 
-## Adding New Features
+**Do not add course services, achievement services, or quiz services.** This is a reference dictionary, not an LMS.
 
-**New Tab/Page**:
-1. Create component in `src/components/local-ui/NewPage.tsx`
-2. Add tab config to `TABS` array in `utils/constants.ts`
-3. Add mapping in `TAB_COMPONENTS` object in `App.tsx`
+### Reusable Components (`components/ui/`)
 
-**New Utility Function**:
-- Organize by domain in `utils/` (courseUtils, appState, etc.)
-- Export pure functions, not components
-
-**New Reusable Component**:
-- Place in `src/components/ui/` (not local-ui)
-- Keep scope narrow; local-ui components are for page-level features
-
-## Path Aliases
-
-Vite is configured with `@` alias pointing to `/src`:
-```ts
-import Header from '@/components/local-ui/NavigationHeader'
-import { TABS } from '@/utils/constants'
-```
-
-Always use `@/` for imports from the src directory.
-
-
+`CodeBlock`, `DocSection`, `HoverCard` — narrow-scope primitives used inside page content.
 
 ## Important Notes
 
-- The app is fully responsive with mobile-first navigation (bottom bar on mobile, top nav on desktop)
-- Data is managed through services (`src/services/`) that fetch from `src/data/`; never hardcode data in components
-- When adding data (courses, quizzes, achievements), add to the appropriate file in `src/data/` and create/update service functions in `src/services/`
-- TypeScript is strict; add types for all props and state
-- Tailwind's primary color is defined in CSS (use `primary-600`, `primary-700` classes)
+- [I1] Always use `@/` imports for anything under `src/`
+- [I2] Tab content lives in the page component's `SECTIONS` array — never in `src/data/` or `src/services/`
+- [I3] The app is fully responsive: bottom nav bar on mobile, top nav on desktop
+- [I4] TypeScript is strict; add types for all props and state
+- [I5] All non-Home tabs must follow the DocsPage.tsx pattern exactly — same types, same render logic, only SECTIONS data differs
