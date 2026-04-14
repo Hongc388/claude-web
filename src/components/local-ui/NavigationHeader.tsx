@@ -16,7 +16,7 @@ export default function NavigationHeader({ tabs, activeTab, setActiveTab }: Navi
               <div className="bg-primary-600 text-white p-2 rounded-lg">
                 <span className="text-2xl">🎓</span>
               </div>
-              <h1 className="text-2xl font-bold text-gray-900">Educational Platform</h1>
+              <h1 className="text-2xl font-bold text-gray-900">Claudipedia</h1>
             </div>
             <nav className="hidden md:flex space-x-4">
               {tabs.map((tab) => (

@@ -1,21 +1,9 @@
 import React, { useState, useMemo } from 'react'
-import { SECTION_SUMMARIES as AGENT_SECTIONS }    from '@/components/local-ui/AgentPage'
-import { SECTION_SUMMARIES as HARDNESS_SECTIONS } from '@/components/local-ui/HardnessPage'
-import { SECTION_SUMMARIES as DOCS_SECTIONS }     from '@/components/local-ui/DocsPage'
-import { SECTION_SUMMARIES as CLIS_SECTIONS }     from '@/components/local-ui/ClisPage'
+import { searchSections } from '@/utils/search'
 import type { ForumPost, ForumAnswer } from '@/data/forum'
 
 interface HomePageProps {
   setActiveTab: (tab: string) => void
-}
-
-interface SearchResult {
-  id: string
-  type: 'course' | 'reference'
-  title: string
-  summary: string
-  tabId: string
-  tabLabel: string
 }
 
 // ─── Tab navigation cards ────────────────────────────────────────────────────
@@ -150,14 +138,6 @@ function PostCard({ post, onAnswer }: PostCardProps) {
   )
 }
 
-// ─── All searchable sections across every tab ─────────────────────────────────
-const ALL_SECTIONS: SearchResult[] = [
-  ...AGENT_SECTIONS.map(s    => ({ id: `agent-${s.id}`,    type: 'section' as const, title: s.label, summary: s.description, tabId: 'agent',    tabLabel: 'Agent'    })),
-  ...HARDNESS_SECTIONS.map(s => ({ id: `hardness-${s.id}`, type: 'section' as const, title: s.label, summary: s.description, tabId: 'hardness', tabLabel: 'Hardness' })),
-  ...DOCS_SECTIONS.map(s     => ({ id: `mds-${s.id}`,      type: 'section' as const, title: s.label, summary: s.description, tabId: 'mds',      tabLabel: '.MDs'     })),
-  ...CLIS_SECTIONS.map(s     => ({ id: `clis-${s.id}`,     type: 'section' as const, title: s.label, summary: s.description, tabId: 'clis',     tabLabel: 'CLIs'     })),
-]
-
 // ─── Main page ────────────────────────────────────────────────────────────────
 export default function HomePage({ setActiveTab }: HomePageProps) {
   const [posts,      setPosts]      = useState<ForumPost[]>([])
@@ -167,14 +147,7 @@ export default function HomePage({ setActiveTab }: HomePageProps) {
   const [questionText, setQuestionText] = useState('')
   const [authorName,   setAuthorName]   = useState('')
 
-  // ── Cross-tab search (synchronous — data comes from imported SECTION_SUMMARIES) ──
-  const searchResults = useMemo((): SearchResult[] => {
-    const q = query.trim().toLowerCase()
-    if (!q) return []
-    return ALL_SECTIONS
-      .filter(s => s.title.toLowerCase().includes(q) || s.summary.toLowerCase().includes(q))
-      .slice(0, 8)
-  }, [query])
+  const searchResults = useMemo(() => searchSections(query), [query])
 
   // ── Forum handlers ──────────────────────────────────────────────────────────
   const handleAddAnswer = (postId: string, text: string, author: string) => {
@@ -272,7 +245,7 @@ export default function HomePage({ setActiveTab }: HomePageProps) {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-0.5">
                         <span className="text-xs font-mono text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded">
-                          {r.type}
+                          {r.tabLabel}
                         </span>
                         <p className="text-sm font-medium text-gray-900 truncate">{r.title}</p>
                       </div>
