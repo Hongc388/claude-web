@@ -4,6 +4,15 @@ import CodeBlock from '@/components/ui/CodeBlock'
 
 // =============================================================================
 // CONTENT DATA — edit this section to update page content
+//
+// Content block types:
+//   { type: 'paragraph', text: '...' }
+//   { type: 'code', text: '...' }
+//   { type: 'cards', items: [{ title, color, body }] }
+//   { type: 'table', header: ['Col1', 'Col2'], rows: [['cell', 'cell'], ...] }
+//   { type: 'heading', text: '...', level?: 2 | 3 }  ← feeds the sidebar TOC
+//
+// Card colors: 'blue' | 'green' | 'purple' | 'orange' | 'red' | 'gray'
 // =============================================================================
 
 type CardColor = 'blue' | 'green' | 'purple' | 'orange' | 'red' | 'gray'
@@ -13,6 +22,7 @@ type ContentBlock =
   | { type: 'code'; text: string }
   | { type: 'cards'; items: { title: string; color: CardColor; body: string }[] }
   | { type: 'table'; header: [string, string]; rows: [string, string][] }
+  | { type: 'heading'; text: string; level?: 2 | 3 }
 
 interface DocSection {
   id: string
@@ -20,6 +30,10 @@ interface DocSection {
   icon: string
   description: string
   content: ContentBlock[]
+}
+
+function slugify(text: string): string {
+  return text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
 }
 
 const SECTIONS: DocSection[] = [
@@ -30,6 +44,7 @@ const SECTIONS: DocSection[] = [
     icon: '📦',
     description: 'Install Claude Code, authenticate, and initialise your first project.',
     content: [
+      { type: 'heading', text: 'Getting Started' },
       {
         type: 'paragraph',
         text: 'Claude Code is distributed as an npm package. Install it globally, set your Anthropic auth token, then run /init in any project to create a CLAUDE.md and .claude/ directory.',
@@ -49,6 +64,8 @@ claude
 # Initialise project settings (creates CLAUDE.md + .claude/)
 > /init`,
       },
+
+      { type: 'heading', text: 'Quick-reference Files' },
       {
         type: 'table',
         header: ['File / Directory', 'Purpose'],
@@ -59,6 +76,8 @@ claude
           ['~/.claude/settings.json', 'Global defaults applied across all projects'],
         ],
       },
+
+      { type: 'heading', text: 'Top-level CLI Commands' },
       {
         type: 'paragraph',
         text: 'Start sessions, pipe content, resume conversations, and manage updates with these top-level CLI commands:',
@@ -96,6 +115,7 @@ claude
     icon: '/',
     description: 'Built-in commands available inside a Claude Code session.',
     content: [
+      { type: 'heading', text: 'Built-in Commands' },
       {
         type: 'paragraph',
         text: 'Type any of these commands at the Claude Code prompt. Skills (user-defined slash commands) extend this list — see the Skills section.',
@@ -107,13 +127,13 @@ claude
           ['?', 'Show a list of available slash commands and their descriptions (alias: /help)'],
           ['/add-dir <path>', 'Add a working directory for file access during the current session'],
           ['/agents', 'Manage agent configurations'],
-          ['/autofix-pr [prompt]', 'Spawn a session that watches the current branch\'s PR and pushes fixes when CI fails or reviewers comment'],
+          ['/autofix-pr [prompt]', "Spawn a session that watches the current branch's PR and pushes fixes when CI fails or reviewers comment"],
           ['/batch <instruction>', 'Orchestrate large-scale changes across a codebase in parallel using background agents in isolated worktrees'],
           ['/branch [name]', 'Create a branch of the current conversation at this point (alias: /fork)'],
           ['/btw <question>', 'Ask a quick side question without adding it to the main conversation context'],
           ['/chrome', 'Configure Claude in Chrome settings'],
           ['/clear', 'Clear conversation history and free up context (aliases: /reset, /new)'],
-          ['/claude-api', 'Load Claude API reference material for your project\'s language (Python, TS, Go, etc.)'],
+          ['/claude-api', "Load Claude API reference material for your project's language (Python, TS, Go, etc.)"],
           ['/color [color|default]', 'Set the prompt bar color for the current session (red, blue, green, yellow, purple, orange, pink, cyan)'],
           ['/commit', 'Auto-generate a conventional commit message and commit staged files'],
           ['/compact [instructions]', 'Compact conversation with optional focus instructions to reduce context size'],
@@ -169,7 +189,7 @@ claude
           ['/skills', 'List available skills'],
           ['/stats', 'Visualize daily usage, session history, streaks, and model preferences'],
           ['/status', 'Open the Settings interface (Status tab) showing version, model, account, and connectivity'],
-          ['/statusline', 'Configure Claude Code\'s status line; describe what you want or run without args to auto-configure'],
+          ['/statusline', "Configure Claude Code's status line; describe what you want or run without args to auto-configure"],
           ['/stickers', 'Order Claude Code stickers'],
           ['/tasks', 'List and manage background tasks (alias: /bashes)'],
           ['/team-onboarding', 'Generate a team onboarding guide from your Claude Code usage history over the past 30 days'],
@@ -183,6 +203,8 @@ claude
           ['/web-setup', 'Connect your GitHub account to Claude Code on the web using your local gh CLI credentials'],
         ],
       },
+
+      { type: 'heading', text: 'Skills (User-defined Commands)' },
       {
         type: 'paragraph',
         text: 'Skills are user-defined slash commands stored in ~/.claude/skills/ or .claude/skills/. They expand to a full prompt when invoked, allowing you to build custom workflows.',
@@ -197,6 +219,7 @@ claude
     icon: '🚩',
     description: 'Flags passed when launching Claude Code from the terminal.',
     content: [
+      { type: 'heading', text: 'Common Launch Patterns' },
       {
         type: 'code',
         text: `# Common launch patterns
@@ -213,8 +236,10 @@ claude --bare -p "query"                    # Minimal mode, no hooks`,
       },
       {
         type: 'paragraph',
-        text: 'Note: claude --help does not list every flag — a flag\'s absence from --help does not mean it is unavailable.',
+        text: "Note: claude --help does not list every flag — a flag's absence from --help does not mean it is unavailable.",
       },
+
+      { type: 'heading', text: 'All Flags' },
       {
         type: 'table',
         header: ['Flag', 'Description'],
@@ -282,9 +307,11 @@ claude --bare -p "query"                    # Minimal mode, no hooks`,
           ['--worktree, -w', 'Start Claude in an isolated git worktree — claude -w feature-auth'],
         ],
       },
+
+      { type: 'heading', text: 'System Prompt Flags' },
       {
         type: 'paragraph',
-        text: 'System prompt flags — four flags for customizing the system prompt, all work in both interactive and non-interactive modes. --system-prompt and --system-prompt-file are mutually exclusive; append flags can combine with either. For most use cases, prefer an append flag to preserve built-in capabilities.',
+        text: 'Four flags for customizing the system prompt, all work in both interactive and non-interactive modes. --system-prompt and --system-prompt-file are mutually exclusive; append flags can combine with either. For most use cases, prefer an append flag to preserve built-in capabilities.',
       },
       {
         type: 'table',
@@ -304,12 +331,15 @@ claude --bare -p "query"                    # Minimal mode, no hooks`,
     id: 'hooks',
     label: 'Hooks Reference',
     icon: '🪝',
-    description: 'Shell commands that execute automatically on Claude Code lifecycle events.',
+    description: 'Shell commands that execute automatically on Claude Code lifecycle events — enforce standards, trigger side effects, or block actions.',
     content: [
+      { type: 'heading', text: 'What are Hooks' },
       {
         type: 'paragraph',
-        text: 'Hooks are shell commands defined in .claude/settings.json that run automatically when Claude Code events fire. They let you enforce standards, trigger side effects, or block actions — without relying on Claude\'s judgment.',
+        text: "Hooks are shell commands defined in .claude/settings.json that run automatically when Claude Code events fire. They let you enforce standards, trigger side effects, or block actions — without relying on Claude's judgment.",
       },
+
+      { type: 'heading', text: 'Hook Events' },
       {
         type: 'table',
         header: ['Hook Event', 'When It Fires'],
@@ -321,6 +351,8 @@ claude --bare -p "query"                    # Minimal mode, no hooks`,
           ['SubagentStop', 'When a subagent finishes its turn'],
         ],
       },
+
+      { type: 'heading', text: 'Configuration Example' },
       {
         type: 'code',
         text: `# .claude/settings.json — hook configuration
@@ -348,13 +380,15 @@ claude --bare -p "query"                    # Minimal mode, no hooks`,
       {
         "hooks": [{
           "type": "command",
-          "command": "osascript -e 'display notification \"Claude finished\" with title \"Claude Code\"'"
+          "command": "osascript -e 'display notification \\"Claude finished\\" with title \\"Claude Code\\"'"
         }]
       }
     ]
   }
 }`,
       },
+
+      { type: 'heading', text: 'Key Concepts' },
       {
         type: 'cards',
         items: [
@@ -380,6 +414,161 @@ claude --bare -p "query"                    # Minimal mode, no hooks`,
           },
         ],
       },
+
+      { type: 'heading', text: 'Conditional Rules with Hooks' },
+      {
+        type: 'paragraph',
+        text: 'For more dynamic control over tool usage, use PreToolUse hooks to validate operations before they execute. This is useful when you need to allow some operations of a tool while blocking others based on the actual input content.',
+      },
+      {
+        type: 'paragraph',
+        text: 'This example creates a subagent that only allows read-only database queries. The PreToolUse hook runs the validation script before each Bash command executes:',
+      },
+      {
+        type: 'code',
+        text: `# .claude/agents/db-reader.md
+---
+name: db-reader
+description: Execute read-only database queries
+tools: Bash
+hooks:
+  PreToolUse:
+    - matcher: "Bash"
+      hooks:
+        - type: command
+          command: "./scripts/validate-readonly-query.sh"
+---`,
+      },
+      {
+        type: 'paragraph',
+        text: 'Claude Code passes hook input as JSON via stdin to hook commands. The validation script reads this JSON, extracts the Bash command, and exits with code 2 to block write operations:',
+      },
+      {
+        type: 'code',
+        text: `#!/bin/bash
+# ./scripts/validate-readonly-query.sh
+# Input: JSON from Claude Code piped via stdin
+
+INPUT=$(cat)
+COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty')
+
+# Block SQL write operations (case-insensitive) — exit 2 blocks the tool
+if echo "$COMMAND" | grep -iE '\\b(INSERT|UPDATE|DELETE|DROP|CREATE|ALTER|TRUNCATE)\\b' > /dev/null; then
+  echo "Blocked: Only SELECT queries are allowed" >&2
+  exit 2
+fi
+
+exit 0`,
+      },
+
+      { type: 'heading', text: 'Subagent with Hooks' },
+      {
+        type: 'paragraph',
+        text: "Subagents can define hooks that run during the subagent's lifecycle. There are two ways to configure hooks: in the subagent's frontmatter (runs only while that subagent is active), or in settings.json (runs in the main session when subagents start or stop).",
+      },
+      {
+        type: 'cards',
+        items: [
+          {
+            title: 'Frontmatter hooks',
+            color: 'blue',
+            body: "Defined inside the subagent's markdown file. Only active while that specific subagent is running — cleaned up automatically when it finishes.",
+          },
+          {
+            title: 'Session-level hooks',
+            color: 'green',
+            body: 'Defined in settings.json using SubagentStart and SubagentStop events. Fire in the main session when any subagent begins or completes.',
+          },
+          {
+            title: 'Frontmatter scope',
+            color: 'orange',
+            body: 'Frontmatter hooks fire when the agent is spawned via the Agent tool or @-mention — NOT when it runs as the main session via --agent or the agent setting.',
+          },
+          {
+            title: 'Stop → SubagentStop',
+            color: 'purple',
+            body: 'Stop hooks defined in subagent frontmatter are automatically converted to SubagentStop events at runtime, so they integrate with session-level hook listeners.',
+          },
+        ],
+      },
+
+      { type: 'heading', text: 'Hooks in Subagent Frontmatter', level: 3 },
+      {
+        type: 'paragraph',
+        text: "Define hooks directly in the subagent's markdown file. These hooks only run while that specific subagent is active. The most common events for subagents are:",
+      },
+      {
+        type: 'table',
+        header: ['Event', 'When It Fires'],
+        rows: [
+          ['PreToolUse', 'Before the subagent uses a tool — can block it by exiting non-zero (matcher: tool name)'],
+          ['PostToolUse', 'After the subagent uses a tool — receives the tool result (matcher: tool name)'],
+          ['Stop', 'When the subagent finishes — automatically converted to SubagentStop at runtime'],
+        ],
+      },
+      {
+        type: 'code',
+        text: `# .claude/agents/code-reviewer.md
+---
+name: code-reviewer
+description: Review code changes with automatic linting
+hooks:
+  PreToolUse:
+    - matcher: "Bash"
+      hooks:
+        - type: command
+          command: "./scripts/validate-command.sh $TOOL_INPUT"
+  PostToolUse:
+    - matcher: "Edit|Write"
+      hooks:
+        - type: command
+          command: "./scripts/run-linter.sh"
+---
+
+You are a senior code reviewer. Review all code changes for:
+1. Security vulnerabilities
+2. Code quality and best practices
+3. Adherence to project conventions`,
+      },
+
+      { type: 'heading', text: 'Project-level Hooks for Subagent Events', level: 3 },
+      {
+        type: 'paragraph',
+        text: 'Configure hooks in settings.json that respond to subagent lifecycle events in the main session. Both SubagentStart and SubagentStop support matchers to target specific agent types by name.',
+      },
+      {
+        type: 'table',
+        header: ['Event', 'When It Fires'],
+        rows: [
+          ['SubagentStart', 'When a subagent begins execution — matcher input is the agent type name'],
+          ['SubagentStop', 'When a subagent completes — matcher input is the agent type name'],
+        ],
+      },
+      {
+        type: 'code',
+        text: `// .claude/settings.json
+{
+  "hooks": {
+    "SubagentStart": [
+      {
+        "matcher": "db-agent",
+        "hooks": [
+          { "type": "command", "command": "./scripts/setup-db-connection.sh" }
+        ]
+      }
+    ],
+    "SubagentStop": [
+      {
+        "hooks": [
+          { "type": "command", "command": "./scripts/cleanup-db-connection.sh" }
+        ]
+      }
+    ]
+  }
+}
+# SubagentStart with matcher "db-agent" → only fires for that specific subagent
+# SubagentStop with no matcher         → fires when ANY subagent finishes`,
+      },
     ],
   },
 
@@ -390,6 +579,7 @@ claude --bare -p "query"                    # Minimal mode, no hooks`,
     icon: '🔧',
     description: 'Built-in tools Claude Code can call during a session, and how to control access to them.',
     content: [
+      { type: 'heading', text: 'Available Tools' },
       {
         type: 'paragraph',
         text: 'Claude Code has a set of built-in tools it can call to read files, run commands, search code, and browse the web. You can restrict, allow, or block specific tools using flags or settings.',
@@ -411,6 +601,8 @@ claude --bare -p "query"                    # Minimal mode, no hooks`,
           ['mcp__<server>__<tool>', 'Any tool exposed by a registered MCP server'],
         ],
       },
+
+      { type: 'heading', text: 'Restrict Tools' },
       {
         type: 'code',
         text: `# Restrict tools via CLI flags
@@ -433,6 +625,8 @@ claude --tools "default"                  # All tools (explicit default)
   }
 }`,
       },
+
+      { type: 'heading', text: 'Permission Rules' },
       {
         type: 'cards',
         items: [
@@ -468,9 +662,10 @@ claude --tools "default"                  # All tools (explicit default)
     icon: '⌨️',
     description: 'Keyboard shortcuts, input modes, and session features for interactive Claude Code sessions.',
     content: [
+      { type: 'heading', text: 'Keyboard Shortcuts' },
       {
         type: 'paragraph',
-        text: 'Interactive mode is the default when you run claude without -p. It keeps a live session open where you type prompts, Claude responds, and conversation history accumulates. Several keyboard shortcuts and modes change how you interact.',
+        text: 'Interactive mode is the default when you run claude without -p. It keeps a live session open where you type prompts, Claude responds, and conversation history accumulates.',
       },
       {
         type: 'table',
@@ -487,6 +682,8 @@ claude --tools "default"                  # All tools (explicit default)
           ['Esc', 'Cancel a multi-line edit or dismiss a dialog'],
         ],
       },
+
+      { type: 'heading', text: 'Permission Modes' },
       {
         type: 'table',
         header: ['Permission Mode', 'Behaviour'],
@@ -498,6 +695,8 @@ claude --tools "default"                  # All tools (explicit default)
           ['bypassPermissions', 'Skips all permission prompts — use only in trusted, sandboxed environments'],
         ],
       },
+
+      { type: 'heading', text: 'Session Features' },
       {
         type: 'cards',
         items: [
@@ -509,7 +708,7 @@ claude --tools "default"                  # All tools (explicit default)
           {
             title: 'Multi-line input',
             color: 'green',
-            body: 'Use Shift+Enter to write multi-line prompts or paste code blocks before submitting. Run /terminal-setup if Shift+Enter doesn\'t work in your terminal.',
+            body: "Use Shift+Enter to write multi-line prompts or paste code blocks before submitting. Run /terminal-setup if Shift+Enter doesn't work in your terminal.",
           },
           {
             title: 'Context tracking',
@@ -551,6 +750,21 @@ const CARD_COLORS: Record<CardColor, { border: string; bg: string; title: string
 
 function renderBlock(block: ContentBlock, index: number): ReactNode {
   switch (block.type) {
+    case 'heading': {
+      const id = slugify(block.text)
+      return block.level === 3
+        ? (
+          <h4 key={index} id={id} className="text-base font-bold text-gray-800 mt-2 scroll-mt-4">
+            {block.text}
+          </h4>
+        )
+        : (
+          <h3 key={index} id={id} className="text-lg font-bold text-gray-900 mt-2 border-b border-gray-100 pb-1 scroll-mt-4">
+            {block.text}
+          </h3>
+        )
+    }
+
     case 'paragraph':
       return <p key={index} className="text-gray-600 leading-relaxed">{block.text}</p>
 
@@ -600,27 +814,36 @@ export default function ClisPage(): ReactNode {
   const [activeSectionId, setActiveSectionId] = useState<string>('install')
   const active = SECTIONS.find(s => s.id === activeSectionId) ?? SECTIONS[0]
 
+  // Auto-generate TOC from heading blocks in the active section
+  const tocItems = active.content.filter(
+    (b): b is { type: 'heading'; text: string; level?: 2 | 3 } => b.type === 'heading',
+  )
+
+  function scrollTo(text: string) {
+    document.getElementById(slugify(text))?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
+
   return (
     <div className="space-y-4">
       {/* Header */}
-      <div className="bg-white rounded-2xl shadow-lg p-8">
-        <div className="flex items-center gap-4 mb-6">
-          <div className="bg-gradient-to-br from-emerald-500 to-green-600 text-white p-3 rounded-xl w-14 h-14 flex items-center justify-center flex-shrink-0">
+      <div className="bg-white rounded-2xl shadow-lg p-6">
+        <div className="flex items-center gap-4 mb-5">
+          <div className="bg-gradient-to-br from-emerald-500 to-green-600 text-white p-3 rounded-xl w-12 h-12 flex items-center justify-center flex-shrink-0">
             <span className="text-2xl">💻</span>
           </div>
           <div>
             <h2 className="text-2xl font-bold text-gray-900">Claude Code CLI Reference</h2>
-            <p className="text-gray-500 text-sm">Installation, commands, flags, IDE extensions, MCP, and memory</p>
+            <p className="text-gray-500 text-sm">Installation · Commands · Flags · Hooks · Tools · Interactive Mode</p>
           </div>
         </div>
 
         {/* Section quick-links */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2">
+        <div className="grid grid-cols-4 sm:grid-cols-7 gap-2">
           {SECTIONS.map((s) => (
             <button
               key={s.id}
               onClick={() => setActiveSectionId(s.id)}
-              className={`flex flex-col items-center gap-1 px-3 py-3 rounded-xl text-sm font-medium transition-colors border ${
+              className={`flex flex-col items-center gap-1 px-2 py-2.5 rounded-xl text-sm font-medium transition-colors border ${
                 activeSectionId === s.id
                   ? 'bg-emerald-50 border-emerald-300 text-emerald-700'
                   : 'bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100'
@@ -633,14 +856,65 @@ export default function ClisPage(): ReactNode {
         </div>
       </div>
 
-      {/* Section content */}
-      <div className="bg-white rounded-2xl shadow-lg p-6 space-y-5">
-        <div>
-          <h3 className="text-xl font-bold text-gray-900">{active.label}</h3>
-          <p className="text-gray-500 text-sm mt-1">{active.description}</p>
+      {/* Two-column layout: sidebar TOC + content */}
+      <div className="flex gap-4 items-start">
+
+        {/* Sidebar TOC (desktop only) */}
+        {tocItems.length > 0 && (
+          <aside className="hidden md:block w-48 shrink-0 sticky top-4">
+            <div className="bg-white rounded-2xl shadow-lg p-4">
+              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">On this page</p>
+              <nav className="space-y-0.5">
+                {tocItems.map((item) => (
+                  <button
+                    key={item.text}
+                    onClick={() => scrollTo(item.text)}
+                    className={`w-full text-left rounded-lg text-xs transition-colors hover:bg-emerald-50 hover:text-emerald-700 text-gray-600 leading-snug py-1.5 ${
+                      item.level === 3 ? 'pl-5 pr-2 text-gray-500' : 'px-2'
+                    }`}
+                  >
+                    {item.text}
+                  </button>
+                ))}
+              </nav>
+            </div>
+          </aside>
+        )}
+
+        {/* Section content */}
+        <div className="flex-1 min-w-0 bg-white rounded-2xl shadow-lg p-6 space-y-5">
+          {/* Section header */}
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-2xl">{active.icon}</span>
+              <h3 className="text-xl font-bold text-gray-900">{active.label}</h3>
+            </div>
+            <p className="text-gray-500 text-sm">{active.description}</p>
+          </div>
+
+          <hr className="border-gray-100" />
+
+          {/* Mobile TOC (pill chips) */}
+          {tocItems.length > 0 && (
+            <div className="md:hidden bg-gray-50 rounded-xl p-3">
+              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">On this page</p>
+              <div className="flex flex-wrap gap-1.5">
+                {tocItems.map((item) => (
+                  <button
+                    key={item.text}
+                    onClick={() => scrollTo(item.text)}
+                    className="text-xs px-2.5 py-1 rounded-full bg-white border border-gray-200 text-gray-600 hover:border-emerald-300 hover:text-emerald-700 transition-colors"
+                  >
+                    {item.text}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Content blocks */}
+          {active.content.map((block, i) => renderBlock(block, i))}
         </div>
-        <hr className="border-gray-100" />
-        {active.content.map((block, i) => renderBlock(block, i))}
       </div>
     </div>
   )

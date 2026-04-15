@@ -7,7 +7,7 @@ export interface Tab {
 
 export const TABS: Tab[] = [
   { id: 'home',     label: 'Home',     icon: '🏠' },
-  { id: 'agent',    label: 'Agent',    icon: '🤖' },
+  { id: 'resources', label: 'Resources', icon: '📚' },
   { id: 'claude',   label: 'Claude',   icon: '🤖' },
   { id: 'mds',      label: '.MDs',     icon: '📄' },
   { id: 'clis',     label: 'CLIs',     icon: '💻' },

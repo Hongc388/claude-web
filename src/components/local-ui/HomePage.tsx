@@ -6,12 +6,97 @@ interface HomePageProps {
   setActiveTab: (tab: string) => void
 }
 
+// ─── Extra reading links ─────────────────────────────────────────────────────
+interface Reading {
+  icon: string
+  tag: string
+  tagColor: string
+  title: string
+  description: string
+  url: string
+}
+
+const EXTRA_READINGS: Reading[] = [
+  {
+    icon: '📖',
+    tag: 'Official Docs',
+    tagColor: 'bg-blue-100 text-blue-700',
+    title: 'Claude Code Overview',
+    description: 'The official Anthropic documentation — installation, CLI flags, IDE integrations, and model selection.',
+    url: 'https://docs.anthropic.com/en/claude-code/overview',
+  },
+  {
+    icon: '🪝',
+    tag: 'Official Docs',
+    tagColor: 'bg-blue-100 text-blue-700',
+    title: 'Hooks Reference',
+    description: 'Complete hook event reference: PreToolUse, PostToolUse, Stop, SubagentStart, SubagentStop — with input schemas and exit-code behaviors.',
+    url: 'https://docs.anthropic.com/en/claude-code/hooks',
+  },
+  {
+    icon: '🤖',
+    tag: 'Official Docs',
+    tagColor: 'bg-blue-100 text-blue-700',
+    title: 'Claude Code Sub-agents',
+    description: 'How to build, configure, and invoke custom subagents. Covers all 16 frontmatter fields, tool control, MCP, and memory patterns.',
+    url: 'https://docs.anthropic.com/en/claude-code/sub-agents',
+  },
+  {
+    icon: '🔑',
+    tag: 'Official Docs',
+    tagColor: 'bg-blue-100 text-blue-700',
+    title: 'Permissions & Settings',
+    description: 'Deep dive into the layered permission model: managed policies, project settings.json, user overrides, and per-tool allow/deny rules.',
+    url: 'https://docs.anthropic.com/en/claude-code/settings',
+  },
+  {
+    icon: '🌐',
+    tag: 'Official Docs',
+    tagColor: 'bg-blue-100 text-blue-700',
+    title: 'MCP Server Integration',
+    description: 'Connect Claude Code to external tools via Model Context Protocol — databases, GitHub, Slack, and custom MCP servers.',
+    url: 'https://docs.anthropic.com/en/claude-code/mcp',
+  },
+  {
+    icon: '📰',
+    tag: 'Blog',
+    tagColor: 'bg-purple-100 text-purple-700',
+    title: 'Introducing Claude Code',
+    description: 'The original Anthropic blog post announcing Claude Code — motivation, design decisions, and the vision for agentic coding.',
+    url: 'https://www.anthropic.com/news/claude-code',
+  },
+  {
+    icon: '🧪',
+    tag: 'GitHub',
+    tagColor: 'bg-gray-100 text-gray-700',
+    title: 'Claude Code on GitHub',
+    description: 'The official Claude Code repository. Browse issues, extension examples, and community discussions around the tool.',
+    url: 'https://github.com/anthropics/claude-code',
+  },
+  {
+    icon: '💡',
+    tag: 'Guide',
+    tagColor: 'bg-orange-100 text-orange-700',
+    title: 'Prompt Engineering for Developers',
+    description: 'Anthropic\'s guide to writing precise, effective prompts — covering context management, chain-of-thought, and tool use patterns.',
+    url: 'https://docs.anthropic.com/en/docs/build-with-claude/prompt-engineering/overview',
+  },
+  {
+    icon: '🔬',
+    tag: 'Guide',
+    tagColor: 'bg-orange-100 text-orange-700',
+    title: 'Building Effective Agents',
+    description: 'Patterns for agentic systems: tool use, multi-step reasoning, orchestration, and when to reach for an agent vs. a simple prompt.',
+    url: 'https://www.anthropic.com/research/building-effective-agents',
+  },
+]
+
 // ─── Tab navigation cards ────────────────────────────────────────────────────
 const NAV_CARDS = [
-  { id: 'agent',    label: 'Agent',    icon: '🤖', color: 'from-blue-500 to-blue-600',   desc: 'AI agent learning path & courses' },
-  { id: 'claude',   label: 'Claude',   icon: '🤖', color: 'from-indigo-500 to-blue-600',   desc: 'Model family, config, workflows & settings' },
-  { id: 'mds',      label: '.MDs',     icon: '📄', color: 'from-orange-400 to-rose-500',  desc: 'Claude Code documentation' },
-  { id: 'clis',     label: 'CLIs',     icon: '💻', color: 'from-emerald-500 to-green-600', desc: 'CLI commands & tools reference' },
+  { id: 'resources', label: 'Resources', icon: '📚', color: 'from-blue-500 to-blue-600',    desc: 'Articles & guides about Claude' },
+  { id: 'claude',    label: 'Claude',    icon: '🤖', color: 'from-indigo-500 to-blue-600',  desc: 'Model family, config, workflows & settings' },
+  { id: 'mds',       label: '.MDs',      icon: '📄', color: 'from-orange-400 to-rose-500',  desc: 'Claude Code documentation' },
+  { id: 'clis',      label: 'CLIs',      icon: '💻', color: 'from-emerald-500 to-green-600', desc: 'CLI commands & tools reference' },
 ]
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -188,7 +273,7 @@ export default function HomePage({ setActiveTab }: HomePageProps) {
       {/* ── Welcome + tab navigation cards ──────────────────────────────────── */}
       <div className="bg-white rounded-2xl shadow-lg p-8">
         <h2 className="text-3xl font-bold text-gray-900 mb-1">Welcome to Claudipedia</h2>
-        <p className="text-gray-500 mb-6">Your interactive learning platform for AI agent concepts.</p>
+        <p className="text-gray-500 mb-6">Your reference dictionary for Claude Code and AI agent concepts.</p>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           {NAV_CARDS.map(card => (
             <button
@@ -263,6 +348,39 @@ export default function HomePage({ setActiveTab }: HomePageProps) {
             )}
           </div>
         )}
+      </div>
+
+      {/* ── Extra Reading ───────────────────────────────────────────────────── */}
+      <div className="bg-white rounded-2xl shadow-lg p-6">
+        <div className="mb-5">
+          <h3 className="text-lg font-bold text-gray-900">Extra Reading</h3>
+          <p className="text-sm text-gray-500 mt-0.5">Curated external resources — official docs, blog posts, and guides</p>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          {EXTRA_READINGS.map(r => (
+            <a
+              key={r.url}
+              href={r.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group flex flex-col gap-2 p-4 rounded-xl border border-gray-100 hover:border-indigo-200 hover:shadow-sm transition-all"
+            >
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-xl">{r.icon}</span>
+                <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${r.tagColor}`}>
+                  {r.tag}
+                </span>
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-gray-900 group-hover:text-indigo-600 transition-colors leading-snug">
+                  {r.title}
+                  <span className="ml-1 text-gray-300 group-hover:text-indigo-400 text-xs">↗</span>
+                </p>
+                <p className="text-xs text-gray-500 mt-1 leading-relaxed line-clamp-2">{r.description}</p>
+              </div>
+            </a>
+          ))}
+        </div>
       </div>
 
       {/* ── Community Forum ──────────────────────────────────────────────────── */}

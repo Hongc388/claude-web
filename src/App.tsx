@@ -3,14 +3,14 @@ import type { ComponentType } from 'react'
 import './App.css'
 import NavigationHeader from '@/components/local-ui/NavigationHeader'
 import HomePage from '@/components/local-ui/HomePage'
-import AgentPage from '@/components/local-ui/AgentPage'
+import ResourcesPage from '@/components/local-ui/ResourcesPage'
 import ClaudePage from '@/components/local-ui/ClaudePage'
 import DocsPage from '@/components/local-ui/DocsPage'
 import ClisPage from '@/components/local-ui/ClisPage'
 import { TABS } from '@/utils/constants'
 
 const TAB_COMPONENTS: Record<string, ComponentType> = {
-  agent:    AgentPage,
+  resources: ResourcesPage,
   claude:   ClaudePage,
   mds:      DocsPage,
   clis:     ClisPage,

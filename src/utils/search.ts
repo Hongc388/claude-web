@@ -1,4 +1,4 @@
-import { SECTION_SUMMARIES as AGENT_SECTIONS }    from '@/components/local-ui/AgentPage'
+import { RESOURCE_SUMMARIES }                      from '@/components/local-ui/ResourcesPage'
 import { SECTION_SUMMARIES as CLAUDE_SECTIONS }   from '@/components/local-ui/ClaudePage'
 import { SECTION_SUMMARIES as DOCS_SECTIONS }     from '@/components/local-ui/DocsPage'
 import { SECTION_SUMMARIES as CLIS_SECTIONS, SLASH_COMMANDS } from '@/components/local-ui/ClisPage'
@@ -14,7 +14,7 @@ export interface SearchResult {
 // Flat index of every section across all tabs.
 // To add a new tab: import its SECTION_SUMMARIES and append a new spread below.
 const ALL_SECTIONS: SearchResult[] = [
-  ...AGENT_SECTIONS.map(s    => ({ id: `agent-${s.id}`,    title: s.label, summary: s.description, tabId: 'agent',    tabLabel: 'Agent'    })),
+  ...RESOURCE_SUMMARIES.map(s => ({ id: `resources-${s.id}`, title: s.label, summary: s.description, tabId: 'resources', tabLabel: 'Resources' })),
   ...CLAUDE_SECTIONS.map(s   => ({ id: `claude-${s.id}`,   title: s.label, summary: s.description, tabId: 'claude',   tabLabel: 'Claude'   })),
   ...DOCS_SECTIONS.map(s     => ({ id: `mds-${s.id}`,      title: s.label, summary: s.description, tabId: 'mds',      tabLabel: '.MDs'     })),
   ...CLIS_SECTIONS.map(s     => ({ id: `clis-${s.id}`,     title: s.label, summary: s.description, tabId: 'clis',     tabLabel: 'CLIs'     })),
